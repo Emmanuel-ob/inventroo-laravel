@@ -35,7 +35,7 @@ class UserController extends Controller
 
   //The constructor function
     public function __construct(InventrooMailUtils $invUtil, TransactionLogUtils $transLogUtil){
-        $this->peppUtil = $peppUtil;
+        $this->invUtil = $invUtil;
         $this->transLogUtil = $transLogUtil;
         $this->perPage = 10;
     }
@@ -111,7 +111,7 @@ class UserController extends Controller
                $user->update(['organization_id' => $org->id]);
             }
 
-            $this->invUtil->invUtil($user);
+            $this->invUtil->send_account_confirmation($user);
           }else{
             return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => 'Registration not successful', "ResponseMessage" => 'Registration not successful'],500);
           }
