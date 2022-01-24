@@ -22,7 +22,6 @@ class CreateUsersTable extends Migration
             $table->string('bvn')->nullable();
             $table->string('unique_id')->nullable();
             $table->string('verification_ref')->nullable();
-            $table->integer('email_verified')->default(0);
             $table->string('email')->unique();
             $table->string('password');
             $table->integer('email_verified')->default(0);
