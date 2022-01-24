@@ -19,17 +19,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class User extends Authenticatable
 {
     use HasApiTokens, Notifiable, SoftDeletes;
-    public function sendPasswordResetNotification($token)
-    {
-        $this->notify(new ResetPasswordNotification($token));
-    }
+    // public function sendPasswordResetNotification($token)
+    // {
+    //     $this->notify(new ResetPasswordNotification($token));
+    // }
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'first_name', 'middle_name', 'last_name', 'bvn', 'email', 'password', 'unique_id', 'username', 'street', 'street2', 'city', 'area_id', 'state_id', 'phone', 'branch_id', 'sex', 'image', 'saving_id', 'pin'     
+        'name', 'first_name', 'middle_name', 'last_name', 'bvn', 'email', 'password', 'unique_id', 'username', 'street', 'street2', 'city', 'postal_code', 'state', 'phone', 'branch_id', 'organization_id', 'gender', 'profile_image_link', 'account_type', 'otp', 'otp_expires_at', 'verification_ref', 'email_verified', 'email_verified_at'
         ];
 
     public function area(){
