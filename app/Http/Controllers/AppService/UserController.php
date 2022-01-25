@@ -227,7 +227,7 @@ class UserController extends Controller
         $user = User::where('email', $request->input('email'))->first();
 
         if (!is_null($user) && $user->status != 1) {
-          $user = new UserResource($user);
+          //$user = new UserResource($user);
 
           //log Audit Trail
           $this->transLogUtil->logAuditTrail($user->id, $request->ip(), 'User Login', '', $user);
