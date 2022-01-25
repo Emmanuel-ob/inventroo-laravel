@@ -19,7 +19,7 @@ class CreateOrganizationsTable extends Migration
             $table->string('business_email', 70)->unique();
             $table->string('description')->nullable();
             $table->string('country')->nullable();
-            $table->string('address');
+            $table->string('address')->nullable();
             $table->string('state')->nullable();
             $table->string('city')->nullable();
             $table->string('business_phone_no')->nullable();
