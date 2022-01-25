@@ -72,7 +72,7 @@ class UserController extends Controller
         ]);
 
         if($validator->fails()){
-          $this->transLogUtil->logRequestError($request);
+          //$this->transLogUtil->logRequestError($request);
           return response()->json([ "ResponseStatus" => "Unsuccessful", 'Detail' => $validator->errors(), "ResponseCode" => 401, "ResponseMessage" => implode(', ',$validator->messages()->all())], 401);
         }
 
