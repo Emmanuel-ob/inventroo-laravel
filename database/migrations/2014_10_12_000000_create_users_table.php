@@ -38,7 +38,7 @@ class CreateUsersTable extends Migration
             $table->integer('branch_id')->nullable();
             $table->integer('organization_id')->nullable();
             $table->integer('otp')->nullable();
-            $table->timestamp('email_verified_at')->nullable();
+            $table->timestamp('otp_verified_at')->nullable();
             $table->softDeletes();
             $table->rememberToken();
             $table->timestamps();
