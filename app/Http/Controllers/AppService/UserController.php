@@ -252,7 +252,7 @@ class UserController extends Controller
         try{
          
           $token = $this->respondWithToken($token);
-          $userInfo = new CustomerResource($user);
+          $userInfo = new   UserResource($user);
           
           //log Audit Trail
           $this->transLogUtil->logAuditTrail($user->id, $request->ip(), 'User Login', '', $user);
@@ -279,7 +279,7 @@ class UserController extends Controller
       if (!is_null($reference)) {
         $user = User::where('verification_ref', $reference)->first();
         if (!is_null($user) && $user->email_verified !=1) {
-          $user->update(['email_verified' => 1, 'email_verified_at' => Carbon::now()]);
+          $user->update(['email_verified' => 1, 'email_verified_at' => Carbon::now(), 'status' => 1]);
           //return response()->json(["ResponseStatus" => "Successful", 'Detail' => 'Your account has been confirmed.', "ResponseCode" => 201], 201);
           $token = $this->respondWithToken(JWTAuth::fromUser($user));
           $userInfo = new UserResource($user);

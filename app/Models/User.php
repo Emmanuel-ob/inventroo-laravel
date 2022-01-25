@@ -6,8 +6,9 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
+//use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 //use App\Notifications\LarashopAdminResetPassword as ResetPasswordNotification;
 
 //use Spatie\Permission\Traits\HasRoles;
@@ -16,9 +17,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 //use DB;
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
-    use HasApiTokens, Notifiable, SoftDeletes;
+    use Notifiable, SoftDeletes;
     // public function sendPasswordResetNotification($token)
     // {
     //     $this->notify(new ResetPasswordNotification($token));
@@ -31,6 +32,16 @@ class User extends Authenticatable
     protected $fillable = [
         'name', 'first_name', 'middle_name', 'last_name', 'bvn', 'email', 'password', 'unique_id', 'username', 'street', 'street2', 'city', 'postal_code', 'state', 'phone', 'branch_id', 'organization_id', 'gender', 'profile_image_link', 'account_type', 'otp', 'otp_expires_at', 'verification_ref', 'email_verified', 'email_verified_at'
         ];
+
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+    
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
 
     public function area(){
         return $this->belongsTo('App\Models\User\Area', 'area_id', 'id');
