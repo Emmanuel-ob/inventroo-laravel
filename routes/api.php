@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::group([
     'namespace' => 'App\Http\Controllers\AppService',
-    'prefix' => 'api',
+    //'prefix' => 'api',
    ], function() {
 
 
