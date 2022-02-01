@@ -39,6 +39,9 @@ Route::group([
     'middleware' => 'AuthToken',
     
    ], function() {
+        Route::post('account/updateOrgAccount', 'UserController@updateOrgAccount');
+
+        
         Route::post('logout', 'UserController@logout');
         Route::post('refreshToken', 'UserController@refreshToken');
         Route::post('resetPassword', 'UserController@resetPassword');

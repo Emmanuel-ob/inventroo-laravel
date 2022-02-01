@@ -24,6 +24,7 @@ use Tymon\JWTAuth\JWTManager as JWT;
 use App\Models\Organization;
 use App\Models\UserLoginAttempt;
 use App\Http\Resources\UserResource;
+use App\Http\Resources\OrganizationResource;
 use GuzzleHttp\Client;
 
 use App\Repositories\InventrooMailUtils;
@@ -102,6 +103,7 @@ class UserController extends Controller
             $org =  Organization::create([
                   'clientName' => $name,
                   'business_email' => $request->input('email'),
+                  'admin_user_id' => $user->id,
                   //'account_type' => $request->input('account_type'),
                   'sub_user_count' => 1,
                  
@@ -128,84 +130,92 @@ class UserController extends Controller
         }
     }
 
-    public function register(Request $request)
+    public function updateOrgAccount(Request $request)
     {
-        //return response()->json($request->all(), 200);
-        if (!$request->accepts(['application/json'])) {
-            return response()->json([ "ResponseStatus" => "Unsuccessful", 'Detail' => "The request format is not allowed","ResponseCode" => 401, "ResponseMessage" => "The request format is not allowed"], 401);
-        }
-
         $validator = Validator::make($request->all() , [
-            'fname' => 'required|string|max:50',
-            'lname' => 'required|string|max:50',
-            'acctNo' => 'nullable|numeric|max:10',
-            'phoneNo' => 'required|numeric',
-            'bankName' => 'nullable|string|max:50',
-            'accountType' => 'nullable|string|max:15', 
-            //'businessName' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|min:6|string', 
-            'resetPassword' => 'nullable|integer', 
-            //'password' => 'required|min:6|regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[!$#%]).*$/', 
+            'company_name' => 'required|string|max:50',
+            'business_type' => 'required|string|max:50',
+            'business_category' => 'required|string|max:50',
+            'reg_no' => 'nullable|string|max:50',
+            'vat_id' => 'nullable|string|max:50',
+            'business_email' => 'required|email|max:50',
+            'business_phone_no' => 'required|string|max:50',
+            'website_link' => 'nullable|string|max:50',
+            'business_address' => 'required|string',
+            'city' => 'required|string|max:50',
+            'state' => 'required|string|max:50',
+            'country' => 'required|string|max:50',
+            'acct_no' => 'nullable|numeric',
+            'acct_name' => 'nullable|string',
+            'acct_bank' => 'nullable|string|max:50',
+            'fiscal_year_from' => 'nullable|date', 
+            'fiscal_year_to' => 'nullable|date',
+            'first_name' => 'required|string|max:50',
+            'last_name' => 'required|string|max:50',
+            'phone_no' => 'nullable|string|max:50',
+            'home_address' => 'required|string',
+            'home_city' => 'required|string|max:50',
+            'home_state' => 'required|string|max:50',
+            'home_country' => 'required|string|max:50',
+            
         ]);
 
         if($validator->fails()){
-          $this->transLogUtil->logRequestError($request);
+          //$this->transLogUtil->logRequestError($request);
           return response()->json([ "ResponseStatus" => "Unsuccessful", 'Detail' => $validator->errors(), "ResponseCode" => 401, "ResponseMessage" => implode(', ',$validator->messages()->all())], 401);
           //implode(', ',$validator->messages()->all())
         }
-
-        $this->transLogUtil->logRequest($request);
+        
+        //$this->transLogUtil->logRequest($request);
 
         try{
-
-          $name = $request->input('fname') . ' ' . $request->input('lname');
-          $password = Hash::make($this->decode_pass($request->input('password')));
-          $user = User::create([
-              'name' => $name,
-              'firstName' => $request->input('fname'),
-              'lastName' => $request->input('lname'),
-              'phoneNo' => $request->input('phoneNo'),
-              'email' => $request->input('email'),
-              'password' => $password,
-              'status' => $request->filled('resetPassword') ? 1 : 0,
-              'resetPassword' => $request->filled('resetPassword') ? $request->input('resetPassword') : 0,
-          ]);
-          
-          $customer = Customer::create([
-                'email' => $request->input('email'),
-                'businessname' => $name, 
-                'name' => $name, 
-                'usertype' => !is_null($request->input('accountType')) ? $request->input('accountType') : 'Buyer',
-                'phone' => $request->input('phoneNo'),
-                'accountno' => $request->input('acctNo'),
-                'bank' => $request->input('bankName'),
-                'merchantid' => generateUniqueID($request->input('email')),
-                //'user_id' => $user->id
-          ]);
-
-          if (!is_null($customer)) {
-            $user->update(['customerID' => $customer->id]);
+          $user = $this->getAuthUser($request);
+          if (!$user) {
+             return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'User not found.', "ResponseMessage" => "User not found.", "ResponseCode" => 401], 401);
           }
+          //$request->filled('productname') ? $request->input('productname') : $product->productname,
+          $name = $request->input('first_name'). ' '. $request->input('last_name');
+          $user->update(['name' => $name, 
+            'first_name' => $request->input('first_name'), 
+            'last_name' => $request->input('last_name'), 
+            'phone' => $request->filled('phone_no') ? $request->input('phone_no') : $user->phone, 
+            'street' => $request->filled('home_address') ? $request->input('home_address') : $user->street, 
+            'city' => $request->filled('home_city') ? $request->input('home_city') : $user->city, 
+            'state' => $request->filled('home_state') ? $request->input('home_state') : $user->state, 
+            'country' => $request->filled('home_country') ? $request->input('home_country') : $user->country
+          ]); 
 
-          $user->generateTwoFactorCode();
-          //send OTP
-          if ($request->filled('resetPassword')) {
-            $pass = $this->decode_pass($request->input('password'));
-            $this->peppUtil->send_welcome_email_with_password($user, $pass);
-          }else{
-            $this->peppUtil->send_user_otp($user);
+          $org = Organization::find($user->organization_id);
+          if (!is_null($org)) {
+            $org->update(['clientName' => $request->filled('company_name') ? $request->input('company_name') : $org->clientName, 
+              'address' => $request->filled('business_address') ? $request->input('business_address') : $org->address, 
+              'state' => $request->filled('state') ? $request->input('state') : $org->state, 
+              'city' => $request->filled('city') ? $request->input('city') : $org->city, 
+              'country' => $request->filled('country') ? $request->input('country') : $org->country, 
+              'business_email' => $request->filled('business_email') ? $request->input('business_email') : $org->business_email,
+              'business_phone_no' => $request->filled('business_phone_no') ? $request->input('business_phone_no') : $org->business_phone_no, 
+              'account_type' => $request->filled('business_type') ? $request->input('business_type') : $org->account_type, 
+              'admin_user_id' => is_null($org->admin_user_id) ? $user->id : $org->admin_user_id, 
+              'reg_no' => $request->filled('reg_no') ? $request->input('reg_no') : $org->reg_no, 
+              'vat_id' => $request->filled('vat_id') ? $request->input('vat_id') : $org->vat_id, 
+              'business_category' => $request->filled('business_category') ? $request->input('business_category') : $org->stbusiness_categoryreet, 
+              'website_link' => $request->filled('website_link') ? $request->input('website_link') : $org->website_link, 
+              'fiscal_year_from' => $request->filled('fiscal_year_from') ? $request->input('fiscal_year_from') : $org->fiscal_year_from, 
+              'fiscal_year_to' => $request->filled('fiscal_year_to') ? $request->input('fiscal_year_to') : $org->fiscal_year_to, 
+              'biz_acct_no' => $request->filled('acct_no') ? $request->input('acct_no') : $org->biz_acct_no, 
+              'biz_acct_name' => $request->filled('acct_name') ? $request->input('acct_name') : $org->biz_acct_name, 
+              'biz_acct_bank' => $request->filled('acct_bank') ? $request->input('acct_bank') : $org->biz_acct_bank, 
+              'biz_acct_country' => $request->filled('country') ? $request->input('country') : $org->biz_acct_country
+            ]);
+
+            $userInfo = new UserResource($user);
+            $companyInfo = new OrganizationResource($org);
+             
+            return response()->json(compact('userInfo', 'companyInfo'),201);
           }
-          
-          //log Audit Trail
-          $this->transLogUtil->logAuditTrail($user->id, $request->ip(), 'User Creation', '', $customer);
-          $this->logPasswordHistory($user->id, $password);
-          
-          $user = new UserResource($user);
-
-          return $this->addHeader(response()->json(compact('user'),201));
+          return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'Company not found', "ResponseCode" => 401],401);
         } catch (Exception $e) {
-          return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => $e->getMessage(), "ResponseMessage" => 'Something went wrong'],500);
+          return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => $e->getMessage(), "ResponseMessage" => 'Something went wrong.'],500);
         }
     }
 
