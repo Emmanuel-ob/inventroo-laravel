@@ -15,8 +15,7 @@ class CreateAuditTrailsTable extends Migration
     {
         Schema::create('audit_trails', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id')->unsigned()->index()->nullable();
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->nullable();
+            $table->integer('user_id')->unsigned()->index()->nullable(); 
             $table->ipAddress('user_ip')->nullable();
             $table->string('event')->nullable();
             $table->string('model')->nullable();
