@@ -34,7 +34,9 @@ class OrganizationResource extends JsonResource
         'acct_name' => $this->biz_acct_name,
         'acct_bank' => $this->biz_acct_bank,
         'fiscal_year_from' => $this->fiscal_year_from,
-        'fiscal_year_to' => $this->fiscal_year_to,  
+        'fiscal_year_to' => $this->fiscal_year_to, 
+        'date_created' => Carbon::parse($this->created_at)->format('M d, Y'),
+        'date_modified' => Carbon::parse($this->updated_at)->format('M d, Y') 
       ];
         
     }

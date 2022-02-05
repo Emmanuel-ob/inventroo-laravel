@@ -875,6 +875,152 @@ class UserController extends Controller
         }
         return redirect()->back();
     }
+
+
+    //This returns user mgt page
+    public function addRole(Request $request){
+      try{
+
+        $this->validate($request, [
+            'email' => 'email|required|unique:users',
+            'password'  => 'string|required|min:4',
+            'lname'  => 'string|required',
+            'fname'  => 'string|required',
+            'job_title'  => 'string|required',
+            'phone_no'  => 'numeric|nullable',
+            'is_super_admin'  => 'integer|nullable',
+            'org_id'  => 'integer|required'
+        ]);
+        $user = Auth::user();
+        //dd($request->all());
+        if(!is_null($user)){
+          
+          User::create(["email" => $request->input('email'),
+                        "password" => Hash::make($request->input('password')),
+                        "firstName" => $request->input('fname'),
+                        "lastName" => $request->input('lname'),
+                        "job_title" => $request->input('job_title'),
+                        "phone_no" => $request->input('phone_no'),
+                        "super_admin" => $request->input('is_super_admin'),
+                        "organization_id" => $request->input('org_id')
+                    ]);
+           return redirect()->route('users')->with('message', 'User account was created sucessfully.');
+        }
+        return redirect()->route('login')->with('message', 'You have to login before accessing the resource.');
+      }
+        //catch exception
+        catch(Exception $e) {
+        return redirect()->back()->with('message', ' - Something went wrong.');
+      }
+    }
+    
+    //This returns user mgt page
+    public function getRoles(){
+      try{
+        $user = Auth::user();
+        //dd($user->orgAccounts);
+        if(!is_null($user)){
+          $user_ids[] = 0;
+          //$user_ids[] = Auth::user()->id;
+          $data['users'] = User::whereNotIn('id', $user_ids)->orderBy('firstName', 'asc')->paginate(30);
+          $data['orgs'] = Organization::all();
+          //dd($data['users'][0]->myOrganization);
+          // $data['new_users'] = HCIS_employee::where('isActive', 0)->orderBy('EmployeeName', 'asc')->get(['EmployeeName', 'Email']);
+          $data['user_roles'] = Role::all();
+          //dd($data['new_users']);
+          $data['userActive'] = 'active-menu';
+          return view('backend.user_mgt', $data);
+        }
+        return redirect()->route('login')->with('message', 'You have to login before accessing the resource.');
+      }
+        //catch exception
+        catch(Exception $e) {
+        return redirect()->back()->with('message', ' - Something went wrong.');
+      }
+    }
+
+   //This returns find user page
+    public function findRole(Request $request){
+       
+        if (!is_null($email = $request['email'])) {
+            $data['user'] = User::where('email', $email)->first();
+            $data['user_roles'] = Role::all();
+            $data['userActive'] = 'active-menu';
+            return view('backend.userSearch', $data);
+        }
+        
+       return redirect()->back()->with('message', 'User not found.');
+    }
+
+    //This function a user's account information
+    public function editRole(Request $request){
+
+      try{
+
+        $this->validate($request, [
+            'email' => 'email|required',
+            'password'  => 'string|nullable',
+            'lname'  => 'string|required',
+            'fname'  => 'string|required',
+            'job_title'  => 'string|required',
+            'phone_no'  => 'numeric|nullable',
+            'is_super_admin'  => 'integer|nullable',
+            'userID'  => 'integer|required',
+            'org_id'  => 'integer|required'
+        ]);
+        $user = Auth::user();
+        //dd($request->all());
+        if(!is_null($user)){
+          $user_update = User::find($request->input('userID'));
+          if (!is_null($user)) {
+            $user_update->update(["email" => $request->input('email'),
+                        "firstName" => $request->input('fname'),
+                        "lastName" => $request->input('lname'),
+                        "job_title" => $request->input('job_title'),
+                        "phone_no" => $request->input('phone_no'),
+                        "super_admin" => $request->input('is_super_admin'),
+                        "organization_id" => $request->input('org_id')
+                    ]);
+            if ($request->filled('password')) {
+              $user_update->update(["password" => Hash::make($request->input('password'))]);
+            }
+          }
+
+        }
+        return redirect()->route('users')->with('message', 'User account was updated sucessfully.');
+        
+      }
+        //catch exception
+        catch(Exception $e) {
+        return redirect()->back()->with('message', ' - Something went wrong.');
+      }
+    }
+    
+    //This function deletes a user's account
+    public function deleteRole(Request $request){
+        if($user = User::find($request['user_id'])){
+            $id = $user->id;
+            $user->delete();
+            RoleUser::where('user_id', $id)->delete();
+            return redirect()->route('users')->with('message', 'User was deleted successfully');
+        }
+        return redirect()->back()->with('message', 'Your action was unsuccessful');
+    }
+
+ //This function blocks and unblock a user
+    public function blockRole(Request $request){
+        if($user = User::find($request['userID'])){
+            if($user->status == 1){
+              $user->update(['status' => 0]);
+              return redirect()->route('users')->with('message', 'User was blocked successfully'); 
+           }else{
+              $user->update(['status' => 1]);
+              return redirect()->route('users')->with('message', 'User was unblocked successfully');
+           }
+           
+        }
+        return redirect()->back();
+    }
     
 
     public function addClient(Request $request)

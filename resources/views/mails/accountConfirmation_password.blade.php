@@ -846,9 +846,9 @@ content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
 <p class=email-pad2><span class=GramE><span style='font-family:"Arial",sans-serif'>Dear {{$name}},</span></span><span style='font-family:"Arial",sans-serif'><o:p></o:p></span></p>
 
-<p><span style='font-family:"Arial",sans-serif'>Welcome to the Inventroo Platform.  You are a step away from accessing your account, please use the token below to confirm your account.<o:p></o:p></span></p>
-
-<p>Token : {{$reference}}</p>
+<p><span style='font-family:"Arial",sans-serif'>Welcome to the Inventroo Platform.  You are a click away from accessing your account, please click <a href="{{$link}}" style="text-decoration: none;"> here</a> or click on the link below to confirm your account.<o:p></o:p></span></p>
+<p>Your default password: <b>{{$password}}</b> ensure you change it as soon as login to the application.</p>
+<p><span style='font-family:"Arial",sans-serif'><a href="{{$link}}" style="text-decoration: none;">{{$link}}</a></span></p>
 
 <p><span style='font-family:"Arial",sans-serif'>Best regards,<o:p></o:p></span></p>
 

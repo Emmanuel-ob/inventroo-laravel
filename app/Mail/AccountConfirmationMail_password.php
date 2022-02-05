@@ -7,7 +7,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class AccountConfirmationMail_token extends Mailable
+class AccountConfirmationMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -31,7 +31,7 @@ class AccountConfirmationMail_token extends Mailable
         //return $this->view('view.name');
         return $this->from(env('MAIL_FROM_ADDRESS'))
         ->subject('Inventroo Account Confirmation')
-        ->view('mails.accountConfirmation_token')->with($this->data);
+        ->view('mails.accountConfirmation_password')->with($this->data);
 
     }
 }

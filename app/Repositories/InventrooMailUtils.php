@@ -1,6 +1,7 @@
 <?php
 namespace App\Repositories;
 use App\Mail\AccountConfirmationMail;
+use App\Mail\AccountConfirmationMail_password;
 use App\Mail\AccountConfirmationMail_token;
 use App\Mail\PasswordResetMail;
 use App\Mail\PasswordResetMail_token;
@@ -30,6 +31,24 @@ class InventrooMailUtils
         $data['link'] = cc('frontend_base_url')."account/confirm?reference=$reference";
     
         if (Mail::to($email)->send(new AccountConfirmationMail($data))) {
+            return true;
+        }
+        return false;
+       
+    }
+
+    public function send_account_confirmation_w_password($userObj, $password)
+    {
+      
+        $data['name'] = $userObj->name;
+        $data['password'] = $password;
+        $email = $userObj->email;
+        $reference = $userObj->verification_ref;
+        //$email = 'emmanuel.obute@asoplc.com';
+        //$data['link'] = route('account.confirm', ['reference' => $userObj->verificationRef]);
+        $data['link'] = cc('frontend_base_url')."account/confirm?reference=$reference";
+    
+        if (Mail::to($email)->send(new AccountConfirmationMail_password($data))) {
             return true;
         }
         return false;

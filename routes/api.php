@@ -41,6 +41,18 @@ Route::group([
    ], function() {
         Route::post('account/updateOrgAccount', 'UserController@updateOrgAccount');
 
+        //Users Routes
+        Route::post('user/add', 'RoleController@addUser');
+        Route::post('user/modify', 'RoleController@editUser');
+        Route::get('user/all', 'RoleController@getUsers');
+        Route::get('user/remove', 'RoleController@deleteUser');
+        Route::get('user/deactivatORactivate', 'RoleController@blockUser');
+        
+        //Roles Routes
+        Route::post('role/add', 'RoleController@addRole');
+        Route::post('role/modify', 'RoleController@editRole');
+        Route::get('role/all', 'RoleController@getRoles');
+        Route::get('role/remove', 'RoleController@deleteRole');
         
         Route::post('logout', 'UserController@logout');
         Route::post('refreshToken', 'UserController@refreshToken');
