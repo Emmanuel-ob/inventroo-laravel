@@ -23,11 +23,15 @@ class UserResource extends JsonResource
         'last_name' => $this->last_name, 
         'phone' => $this->phone, 
         'organization' => $this->myOrganization, 
+        'role' => $this->role,
+        'account_type' => $this->account_type,
         // 'otp' => $this->otp, 
         // 'otp_expires_in_secs' => Carbon::now()->diffInSeconds(Carbon::parse($this->otp_expires_in_secs)), 
         'profileStatus' => ($this->status == 1) ? true : false,
         //'AccountStatus' => ($this->locked == 1) ? 'Locked' : 'Active',
-        'email_verified' => ($this->email_verified== 1) ? true : false,  
+        'email_verified' => ($this->email_verified== 1) ? true : false, 
+        'date_created' => Carbon::parse($this->created_at)->format('M d, Y'),
+        'date_modified' => Carbon::parse($this->updated_at)->format('M d, Y') 
       ];
         
     }

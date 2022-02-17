@@ -53,6 +53,42 @@ Route::group([
         Route::post('role/modify', 'RoleController@editRole');
         Route::get('role/all', 'RoleController@getRoles');
         Route::get('role/remove', 'RoleController@deleteRole');
+
+        //Roles Routes
+        Route::post('unit/add', 'ProductController@addUnit');
+        Route::post('unit/modify', 'ProductController@editUnit');
+        Route::get('unit/all', 'ProductController@getUnits');
+        Route::get('unit/find', 'ProductController@findUnit');
+        Route::get('unit/remove', 'ProductController@deleteUnit');
+
+        //Roles Routes
+        Route::post('brand/add', 'ProductController@addBrand');
+        Route::post('brand/modify', 'ProductController@editBrand');
+        Route::get('brand/all', 'ProductController@getBrands');
+        Route::get('brand/find', 'ProductController@findBrand');
+        Route::get('brand/remove', 'ProductController@deleteBrand');
+
+        //Roles Routes
+        Route::post('manufacturer/add', 'ProductController@addManufacturer');
+        Route::post('manufacturer/modify', 'ProductController@editManufacturer');
+        Route::get('manufacturer/all', 'ProductController@getManufacturers');
+        Route::get('manufacturer/find', 'ProductController@findManufacturer');
+        Route::get('manufacturer/remove', 'ProductController@deleteManufacturer');
+
+        //Roles Routes
+        Route::post('tax/add', 'ProductController@addTax');
+        Route::post('tax/modify', 'ProductController@editTax');
+        Route::get('tax/all', 'ProductController@getTaxes');
+        Route::get('tax/find', 'ProductController@findTax');
+        Route::get('tax/remove', 'ProductController@deleteTax');
+
+
+        Route::post('product/add', 'ProductController@addProduct');
+        Route::post('product/modify', 'ProductController@editProduct');
+        Route::get('product/all', 'ProductController@getProducts');
+        Route::get('product/find', 'ProductController@findProduct');
+        Route::get('product/remove', 'ProductController@deleteProduct');
+        Route::get('product/deactivatORactivate', 'ProductController@blockProduct');
         
         Route::post('logout', 'UserController@logout');
         Route::post('refreshToken', 'UserController@refreshToken');

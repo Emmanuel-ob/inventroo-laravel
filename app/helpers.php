@@ -176,6 +176,13 @@ if (! function_exists('generateUniqueCode')) {
     }
 }
 
+if (! function_exists('generateProductRef')) {
+    function generateProductRef($id, $l = 5)
+    {
+        return 'INT-PR-'.$id.'-'. substr(md5(uniqid(mt_rand(), true)), 0, $l);
+    }
+}
+
 
 
 if (! function_exists('generateSlug')) {

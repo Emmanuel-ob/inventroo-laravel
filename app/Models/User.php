@@ -48,6 +48,31 @@ class User extends Authenticatable implements JWTSubject
         return $this->belongsTo(Organization::class, 'organization_id', 'id');
     }
 
+    public function role(){
+        return $this->hasOneThrough(
+            Role::class,
+            RoleUser::class,
+            'user_id',
+            'id',
+            'id',
+            'role_id'
+        )->select(['id', 'name']);
+    }
+
+    // public function orders()
+    // {
+    //     return $this->hasOneThrough(
+    //         Order::class,
+    //         Product::class,
+    //         'supplier_id', // Foreign key on products table...
+    //         'product_id', // Foreign key on orders table...
+    //         'id', // Local key on suppliers table...
+    //         'id' // Local key on products table...
+    //     );
+    // }
+
+    
+
     public function area(){
         return $this->belongsTo('App\Models\User\Area', 'area_id', 'id');
         }
