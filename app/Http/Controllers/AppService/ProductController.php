@@ -247,11 +247,12 @@ class ProductController extends Controller
               }
 
               $this->transLogUtil->logAuditTrail($user->id, $request->ip(), 'Product Modification', $prod_bk, $product);
-            }
-          }
-          $product = new ProductResource($product);
 
-          return response()->json(compact('product'),201);
+            }
+            $product = new ProductResource($product);
+
+            return response()->json(compact('product'),201);
+          
         }
         return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'You are not authorized to perform this function.', "ResponseMessage" => 'You are not authorized to perform this function.', "ResponseCode" => 401],401);
         
