@@ -56,7 +56,7 @@ class User extends Authenticatable implements JWTSubject
             'id',
             'id',
             'role_id'
-        )->select(['id', 'name']);
+        );
     }
 
     // public function orders()
