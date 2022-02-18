@@ -114,7 +114,7 @@ class ProductController extends Controller
         if ($user->account_type != '') {
 
           $product = Product::create(["name" => $request->input('name'),
-                "organization_id" => $user->organization_id
+                "organization_id" => $user->organization_id,
                 'type' => $request->input('type'), 
                 'dimension' => $request->input('dimension'), 
                 'weight' => $request->input('weight'), 
