@@ -876,7 +876,7 @@ class ProductController extends Controller
           return response()->json([ "ResponseStatus" => "Unsuccessful", 'Detail' => $validator->errors(), "ResponseCode" => 401, "ResponseMessage" => implode(', ',$validator->messages()->all())], 401);
           //implode(', ',$validator->messages()->all())
         }
-        ['name', 'percentage', 'organization_id']
+        
         $user = $this->getAuthUser($request);
         if (!$user) {
            return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'User not found.', "ResponseMessage" => "User not found.", "ResponseCode" => 401], 401);
