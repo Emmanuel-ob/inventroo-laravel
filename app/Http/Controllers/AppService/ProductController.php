@@ -306,8 +306,12 @@ class ProductController extends Controller
         
         $product = Product::find($request->input('productID'));
         if (!is_null($product)) {
+          $brands = Brand::where('organization_id', $user->organization_id)->get();
+          $manufacturers = Manufacturer::where('organization_id', $user->organization_id)->get();
+          $units = Unit::where('organization_id', $user->organization_id)->get();
+          $taxes = Tax::where('organization_id', $user->organization_id)->get();
           $product = new ProductResource($product);
-          return response()->json(compact('manufacturer'),201);
+          return response()->json(compact('product', 'brands', 'manufacturers', 'units', 'taxes'),201);
         }
         return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'product not found', "ResponseMessage" => 'product not found', "ResponseCode" => 401],401);
         
