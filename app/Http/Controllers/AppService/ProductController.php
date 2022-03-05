@@ -1086,10 +1086,10 @@ class ProductController extends Controller
 
             $products = $request->input('products');
             if (!is_null($products)) {
-              foreach ($products as $product) {
+              foreach ($products as $product_id) {
                 ProductGroupProduct::create([
                   'product_group_id' => $productGr->id, 
-                  'product_id' => $product['product_id'], 
+                  'product_id' => $product_id, 
                 ]);
               }
             }
@@ -1169,10 +1169,10 @@ class ProductController extends Controller
               $products = $request->input('products');
               if (!is_null($products)) {
                 ProductGroupProduct::where('product_group_id', $productGr->id)->delete();
-                foreach ($products as $product) {
+                foreach ($products as $product_id) {
                   ProductGroupProduct::create([
                     'product_group_id' => $productGr->id, 
-                    'product_id' => $product['product_id'], 
+                    'product_id' => $product_id, 
                   ]);
                 }
               } 
