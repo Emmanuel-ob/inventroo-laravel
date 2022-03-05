@@ -183,6 +183,13 @@ if (! function_exists('generateProductRef')) {
     }
 }
 
+if (! function_exists('generateProductGroupRef')) {
+    function generateProductGroupRef($id, $l = 5)
+    {
+        return 'INT-PR-GR-'.$id.'-'. substr(md5(uniqid(mt_rand(), true)), 0, $l);
+    }
+}
+
 
 
 if (! function_exists('generateSlug')) {

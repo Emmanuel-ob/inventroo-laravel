@@ -89,6 +89,13 @@ Route::group([
         Route::get('product/find', 'ProductController@findProduct');
         Route::get('product/remove', 'ProductController@deleteProduct');
         Route::get('product/deactivatORactivate', 'ProductController@blockProduct');
+
+        Route::post('productGroup/add', 'ProductController@addProductGroup');
+        Route::post('productGroup/modify', 'ProductController@editProductGroup');
+        Route::get('productGroup/all', 'ProductController@getProductGroups');
+        Route::get('productGroup/find', 'ProductController@findProductGroup');
+        Route::get('productGroup/remove', 'ProductController@deleteProductGroup');
+        Route::get('productGroup/deactivatORactivate', 'ProductController@blockProductGroup');
         
         Route::post('logout', 'UserController@logout');
         Route::post('refreshToken', 'UserController@refreshToken');

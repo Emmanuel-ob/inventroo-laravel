@@ -19,16 +19,12 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 use Tymon\JWTAuth\PayloadFactory;
 use Tymon\JWTAuth\JWTManager as JWT;
 use App\Models\Product;
-use App\Models\ProductGroup;
-use App\Models\ProductGroupProduct;
-use App\Models\ProductGroupAttribute;
 use App\Models\Tax;
 use App\Models\Unit;
 use App\Models\Manufacturer;
 use App\Models\Brand;
 use App\Http\Resources\UserResource;
 use App\Http\Resources\ProductResource;
-use App\Http\Resources\ProductGroupResource;
 use GuzzleHttp\Client;
 
 use App\Repositories\InventrooMailUtils;
@@ -36,7 +32,7 @@ use App\Repositories\TransactionLogUtils;
 use App\Repositories\ImageUtils;
 
 
-class ProductController extends Controller
+class InventoryController extends Controller
 {   
 
   //The constructor function
@@ -74,7 +70,7 @@ class ProductController extends Controller
     
 
     
-    //This Adds a product
+    //This returns user mgt page
     public function addProduct(Request $request){
       try{
 
@@ -360,7 +356,7 @@ class ProductController extends Controller
     public function blockProduct(Request $request){
       try{
         $validator = Validator::make($request->all() , [
-            'productID'  => 'integer|required',
+            'userID'  => 'integer|required',
         ]);
         if($validator->fails()){
           //$this->transLogUtil->logRequestError($request);
@@ -1016,304 +1012,6 @@ class ProductController extends Controller
             return response()->json(["ResponseStatus" => "Successful", 'Detail' => 'tax deleted successfully', "ResponseMessage" => 'tax deleted successfully', "ResponseCode" => 201],201);
           }
           return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'tax not found', "ResponseMessage" => 'tax not found', "ResponseCode" => 401],401);
-        }
-        return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'You are not authorized to perform this function.', "ResponseMessage" => 'You are not authorized to perform this function.', "ResponseCode" => 401],401);
-        
-      }catch(Exception $e) {
-        return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => $e->getMessage(), "ResponseMessage" => 'Something went wrong.'],500);
-      }
-    }
-
-
-    //This Adds a product
-    public function addProductGroup(Request $request){
-      try{
-
-        $validator = Validator::make($request->all() , [
-            'name'  => 'string|required',
-            'type'  => 'string|required',
-            'returnable'  => 'integer|nullable',
-            'unit_id'  => 'integer|required',
-            'brand_id'  => 'integer|required',
-            'manufacturer_id'  => 'integer|required',
-            'tax_id'  => 'integer|required',
-            'products'  => 'required|array',
-            'products.*'  => 'integer',
-            'attributes'  => 'required|array',
-            'attributes.*'  => 'string',
-            
-        ]);
-
-      
-        if($validator->fails()){
-          //$this->transLogUtil->logRequestError($request);
-          return response()->json([ "ResponseStatus" => "Unsuccessful", 'Detail' => $validator->errors(), "ResponseCode" => 401, "ResponseMessage" => implode(', ',$validator->messages()->all())], 401);
-          //implode(', ',$validator->messages()->all())
-        }
-      
-        //$this->transLogUtil->logRequest($request);
-        $user = $this->getAuthUser($request);
-        if (!$user) {
-           return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'User not found.', "ResponseMessage" => "User not found.", "ResponseCode" => 401], 401);
-        }
-        if ($user->account_type != '') {
-
-          $productGr = ProductGroup::create(["name" => $request->input('name'),
-                "organization_id" => $user->organization_id,
-                'created_by_id' => $user->id,
-                'type' => $request->input('type'), 
-                'returnable' => $request->input('returnable'), 
-                'unit_id' => $request->input('unit_id'), 
-                'brand_id' => $request->input('brand_id'), 
-                'manufacturer_id' => $request->input('manufacturer_id'), 
-                'tax_id' => $request->input('tax_id'), 
-                
-              ]);
-
-          if (!is_null($productGr)) {
-            $productGr->update(['reference' => generateProductGroupRef($productGr->id)]);
-            $attributes = $request->input('attributes');
-            if (!is_null($attributes)) {
-              foreach ($attributes as $attribute) {
-                ProductGroupAttribute::create([
-                  'product_group_id' => $productGr->id, 
-                  'attribute_name' => $attribute['name'], 
-                  'attribute_value' => $attribute['option'], 
-                  'organization_id' => $user->organization_id
-                ]);
-              }
-            }
-
-            $products = $request->input('products');
-            if (!is_null($products)) {
-              foreach ($products as $product) {
-                ProductGroupProduct::create([
-                  'product_group_id' => $productGr->id, 
-                  'product_id' => $product['product_id'], 
-                ]);
-              }
-            }
-            
-            $this->transLogUtil->logAuditTrail($user->id, $request->ip(), 'Product Group Creation', '', $productGr);
-            
-          }
-         $productGroup = new ProductGroupResource($productGr);
-
-          return response()->json(compact('productGroup'),201);
-        }
-        return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'You are not authorized to perform this function.', "ResponseMessage" => 'You are not authorized to perform this function.', "ResponseCode" => 401],401);
-        
-      }catch(Exception $e) {
-        return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => $e->getMessage(), "ResponseMessage" => 'Something went wrong.'],500);
-      }
-    }
-
-
-     //This function modifies aproduct group
-    public function editProductGroup(Request $request){
-
-      try{
-
-        $validator = Validator::make($request->all() , [
-            'productGroupID'  => 'integer|required',
-            'name'  => 'string|required',
-            'type'  => 'string|required',
-            'returnable'  => 'integer|nullable',
-            'unit_id'  => 'integer|required',
-            'brand_id'  => 'integer|required',
-            'manufacturer_id'  => 'integer|required',
-            'tax_id'  => 'integer|required',
-            'products'  => 'required|array',
-            'products.*'  => 'integer',
-            'attributes'  => 'required|array',
-            'attributes.*'  => 'string',
-        ]);
-        
-        if($validator->fails()){
-          //$this->transLogUtil->logRequestError($request);
-          return response()->json([ "ResponseStatus" => "Unsuccessful", 'Detail' => $validator->errors(), "ResponseCode" => 401, "ResponseMessage" => implode(', ',$validator->messages()->all())], 401);
-          //implode(', ',$validator->messages()->all())
-        }
-        $user = $this->getAuthUser($request);
-        if (!$user) {
-           return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'User not found.', "ResponseMessage" => "User not found.", "ResponseCode" => 401], 401);
-        }
-        if ($user->account_type != '') {
-          $productGr = ProductGroup::find($request->input('productGroupID'));
-          $productGr_bk = $productGr;
-          if (!is_null($productGr)) {
-              $productGr->update(["name" => $request->filled('name') ? $request->input('name') : $productGr->name,
-                'type' => $request->filled('type') ? $request->input('type') : $productGr->type, 
-                'returnable' => $request->filled('returnable') ? $request->input('returnable') : $productGr->returnable, 
-                'unit_id' => $request->filled('unit_id') ? $request->input('unit_id') : $productGr->unit_id, 
-                'brand_id' => $request->filled('brand_id') ? $request->input('brand_id') : $productGr->brand_id, 
-                'manufacturer_id' => $request->filled('manufacturer_id') ? $request->input('manufacturer_id') : $productGr->manufacturer_id, 
-                'tax_id' => $request->filled('tax_id') ? $request->input('tax_id') : $productGr->tax_id, 
-                
-              ]);
-
-              
-              $attributes = $request->input('attributes');
-              if (!is_null($attributes)) {
-                ProductGroupAttribute::where('product_group_id', $productGr->id)->delete();
-                foreach ($attributes as $attribute) {
-                  ProductGroupAttribute::create([
-                    'product_group_id' => $productGr->id, 
-                    'attribute_name' => $attribute['name'], 
-                    'attribute_value' => $attribute['option'], 
-                    'organization_id' => $user->organization_id
-                  ]);
-                }
-              }
-
-              $products = $request->input('products');
-              if (!is_null($products)) {
-                ProductGroupProduct::where('product_group_id', $productGr->id)->delete();
-                foreach ($products as $product) {
-                  ProductGroupProduct::create([
-                    'product_group_id' => $productGr->id, 
-                    'product_id' => $product['product_id'], 
-                  ]);
-                }
-              } 
-
-              $this->transLogUtil->logAuditTrail($user->id, $request->ip(), 'Product Group Modification', $productGr_bk, $productGr);
-
-            }
-            $productGroup = new ProductGroupResource($productGr);
-
-            return response()->json(compact('productGroup'),201);
-          
-        }
-        return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'You are not authorized to perform this function.', "ResponseMessage" => 'You are not authorized to perform this function.', "ResponseCode" => 401],401);
-        
-      }catch(Exception $e) {
-        return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => $e->getMessage(), "ResponseMessage" => 'Something went wrong.'],500);
-      }
-    }
-    
-    //This returns user mgt page
-    public function getProductGroups(Request $request){
-      try{
-        $user = $this->getAuthUser($request);
-        if (!$user) {
-           return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'User not found.', "ResponseMessage" => "User not found.", "ResponseCode" => 401], 401);
-        }
-        if ($user->account_type != '') {
-          $user_ids[] = 0;
-          //$user_ids[] = Auth::user()->id;
-          $productGroups = ProductGroup::where('organization_id', $user->organization_id)->orderBy('name', 'asc')->paginate(30);
-          $products = Product::where('organization_id', $user->organization_id)->orderBy('name', 'asc');
-          $brands = Brand::where('organization_id', $user->organization_id)->get();
-          $manufacturers = Manufacturer::where('organization_id', $user->organization_id)->get();
-          $units = Unit::where('organization_id', $user->organization_id)->get();
-          $taxes = Tax::where('organization_id', $user->organization_id)->get();
-          $productGroups = ProductGroupResource::collection($productGroups);
-          $products = ProductResource::collection($products);
-          
-          return response()->json(compact('productGroups', 'products', 'brands', 'manufacturers', 'units', 'taxes'),201);
-        }
-        return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'You are not authorized to perform this function.', "ResponseMessage" => 'You are not authorized to perform this function.', "ResponseCode" => 401],401);
-        
-      }catch(Exception $e) {
-        return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => $e->getMessage(), "ResponseMessage" => 'Something went wrong.'],500);
-      }
-    }
-
-   //This returns find user page
-    public function findProductGroup(Request $request){
-       try{
-        $validator = Validator::make($request->all() , [
-            'productGroupID'  => 'integer|required',
-        ]);
-        if($validator->fails()){
-          //$this->transLogUtil->logRequestError($request);
-          return response()->json([ "ResponseStatus" => "Unsuccessful", 'Detail' => $validator->errors(), "ResponseCode" => 401, "ResponseMessage" => implode(', ',$validator->messages()->all())], 401);
-          //implode(', ',$validator->messages()->all())
-        }
-        $user = $this->getAuthUser($request);
-        if (!$user) {
-           return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'User not found.', "ResponseMessage" => "User not found.", "ResponseCode" => 401], 401);
-        }
-        
-        $productGroup = ProductGroup::find($request->input('productGroupID'));
-        if (!is_null($productGroup)) {
-          $products = Product::where('organization_id', $user->organization_id)->orderBy('name', 'asc');
-          $brands = Brand::where('organization_id', $user->organization_id)->get();
-          $manufacturers = Manufacturer::where('organization_id', $user->organization_id)->get();
-          $units = Unit::where('organization_id', $user->organization_id)->get();
-          $taxes = Tax::where('organization_id', $user->organization_id)->get();
-          $productGroup = new ProductResource($productGroup);
-          $products = ProductResource::collection($products);
-          return response()->json(compact('productGroup', 'products', 'brands', 'manufacturers', 'units', 'taxes'),201);
-        }
-        return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'product group not found', "ResponseMessage" => 'product group not found', "ResponseCode" => 401],401);
-        
-      }catch(Exception $e) {
-        return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => $e->getMessage(), "ResponseMessage" => 'Something went wrong.'],500);
-      }
-    }
-
-   
-    
-    //This function deletes a product group
-    public function deleteProductGroup(Request $request){
-      try{
-        $validator = Validator::make($request->all() , [
-            'productGroupID'  => 'integer|required',
-        ]);
-        if($validator->fails()){
-          //$this->transLogUtil->logRequestError($request);
-          return response()->json([ "ResponseStatus" => "Unsuccessful", 'Detail' => $validator->errors(), "ResponseCode" => 401, "ResponseMessage" => implode(', ',$validator->messages()->all())], 401);
-          //implode(', ',$validator->messages()->all())
-        }
-        $user = $this->getAuthUser($request);
-        if (!$user) {
-           return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'User not found.', "ResponseMessage" => "User not found.", "ResponseCode" => 401], 401);
-        }
-        if ($user->account_type != '') {
-          $productGroup = ProductGroup::find($request->input('productGroupID'));
-          if (!is_null($productGroup)) {
-            $productGroup->delete();
-            return response()->json(["ResponseStatus" => "Successful", 'Detail' => 'product group deleted successfully', "ResponseMessage" => 'product group deleted successfully', "ResponseCode" => 201],201);
-          }
-          return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'product group not found', "ResponseMessage" => 'product group not found', "ResponseCode" => 401],401);
-        }
-        return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'You are not authorized to perform this function.', "ResponseMessage" => 'You are not authorized to perform this function.', "ResponseCode" => 401],401);
-        
-      }catch(Exception $e) {
-        return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => $e->getMessage(), "ResponseMessage" => 'Something went wrong.'],500);
-      }
-    }
-
- //This function blocks and unblock a user
-    public function blockProductGroup(Request $request){
-      try{
-        $validator = Validator::make($request->all() , [
-            'productGroupID'  => 'integer|required',
-        ]);
-        if($validator->fails()){
-          //$this->transLogUtil->logRequestError($request);
-          return response()->json([ "ResponseStatus" => "Unsuccessful", 'Detail' => $validator->errors(), "ResponseCode" => 401, "ResponseMessage" => implode(', ',$validator->messages()->all())], 401);
-          //implode(', ',$validator->messages()->all())
-        }
-        $user = $this->getAuthUser($request);
-        if (!$user) {
-           return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'User not found.', "ResponseMessage" => "User not found.", "ResponseCode" => 401], 401);
-        }
-        if ($user->account_type != '') {
-          if($productGroup = ProductGroup::find($request->input('productGroupID'))){
-              if($productGroup->status == 1){
-                $productGroup->update(['status' => 0]);
-                $message = 'Deactivated'; 
-              }else{
-                $productGroup->update(['status' => 1]);
-                $message = 'Activated'; 
-              }
-             
-           return response()->json(["ResponseStatus" => "Successful", 'Detail' => 'product group successfully $message', "ResponseMessage" => "product group successfully $message", "ResponseCode" => 201],201);
-          }
-          return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'product group not found', "ResponseMessage" => 'product group not found', "ResponseCode" => 401],401);
         }
         return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'You are not authorized to perform this function.', "ResponseMessage" => 'You are not authorized to perform this function.', "ResponseCode" => 401],401);
         
