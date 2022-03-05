@@ -1138,6 +1138,8 @@ class ProductController extends Controller
         if (!$user) {
            return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'User not found.', "ResponseMessage" => "User not found.", "ResponseCode" => 401], 401);
         }
+        $attributes = $request->input('attributes');
+        return response()->json(compact('attributes'),201);
         if ($user->account_type != '') {
           $productGr = ProductGroup::find($request->input('productGroupID'));
           $productGr_bk = $productGr;
