@@ -1077,8 +1077,8 @@ class ProductController extends Controller
               foreach ($attributes as $attribute) {
                 ProductGroupAttribute::create([
                   'product_group_id' => $productGr->id, 
-                  'attribute_name' => $attribute['name'], 
-                  'attribute_value' => $attribute['option'], 
+                  'attribute_name' => $attribute->name, 
+                  'attribute_value' => $attribute->option, 
                   'organization_id' => $user->organization_id
                 ]);
               }
@@ -1159,8 +1159,8 @@ class ProductController extends Controller
                 foreach ($attributes as $attribute) {
                   ProductGroupAttribute::create([
                     'product_group_id' => $productGr->id, 
-                    'attribute_name' => $attribute['name'], 
-                    'attribute_value' => $attribute['option'], 
+                    'attribute_name' => $attribute->name, 
+                    'attribute_value' => $attribute->option, 
                     'organization_id' => $user->organization_id
                   ]);
                 }
