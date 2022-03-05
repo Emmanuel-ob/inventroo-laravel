@@ -1050,9 +1050,9 @@ class ProductController extends Controller
           return response()->json([ "ResponseStatus" => "Unsuccessful", 'Detail' => $validator->errors(), "ResponseCode" => 401, "ResponseMessage" => implode(', ',$validator->messages()->all())], 401);
           //implode(', ',$validator->messages()->all())
         }
-        $attributes = $request->input('attributes');
-        $products = $request->input('products');
-        return response()->json(compact('attributes', 'products'),201);
+        // $attributes = $request->input('attributes');
+        // $products = $request->input('products');
+        // return response()->json(compact('attributes', 'products'),201);
         //$this->transLogUtil->logRequest($request);
         $user = $this->getAuthUser($request);
         if (!$user) {
@@ -1077,6 +1077,7 @@ class ProductController extends Controller
             $attributes = $request->input('attributes');
             if (!is_null($attributes)) {
               foreach ($attributes as $attribute) {
+                $attribute = json_decode($attribute);
                 ProductGroupAttribute::create([
                   'product_group_id' => $productGr->id, 
                   'attribute_name' => $attribute->name, 
@@ -1160,6 +1161,7 @@ class ProductController extends Controller
               if (!is_null($attributes)) {
                 ProductGroupAttribute::where('product_group_id', $productGr->id)->delete();
                 foreach ($attributes as $attribute) {
+                  $attribute = json_decode($attribute);
                   ProductGroupAttribute::create([
                     'product_group_id' => $productGr->id, 
                     'attribute_name' => $attribute->name, 
