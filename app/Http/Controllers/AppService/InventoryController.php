@@ -23,6 +23,9 @@ use App\Models\Tax;
 use App\Models\Unit;
 use App\Models\Manufacturer;
 use App\Models\Brand;
+use App\Models\InventoryAdjustment;
+use App\Models\PriceList;
+use App\Models\PriceListProduct;
 use App\Http\Resources\UserResource;
 use App\Http\Resources\ProductResource;
 use GuzzleHttp\Client;
@@ -70,34 +73,25 @@ class InventoryController extends Controller
     
 
     
-    //This returns user mgt page
-    public function addProduct(Request $request){
+    //This creates an Inventory Adjustment
+    public function addInventoryAdjustment(Request $request){
       try{
 
         $validator = Validator::make($request->all() , [
-            'name'  => 'string|required',
-            'type'  => 'string|required',
-            'dimension'  => 'string|required',
-            'weight'  => 'string|required',
-            'unit_id'  => 'integer|required',
-            'brand_id'  => 'integer|required',
-            'manufacturer_id'  => 'integer|required',
-            'tax_id'  => 'integer|required',
-            'inventory_account_id'  => 'integer|nullable',
-            'upc'  => 'string|nullable',
-            'mpn'  => 'string|nullable',
-            'ean'  => 'string|nullable',
-            'isbn'  => 'string|nullable',
-            'currency'  => 'string|nullable',
-            'sale_price'  => 'numeric|required',
-            'sale_tax_percent'  => 'numeric|nullable',
-            'cost_price'  => 'numeric|required',
-            'cost_tax_percent'  => 'numeric|nullable',
-            'opening_stock'  => 'numeric|nullable',
-            'opening_stock_rate_per_unit'  => 'numeric|nullable',
-            'recorder_point'  => 'string|nullable',
-            'prefered_vendor'  => 'string|nullable',
-            'product_image' => 'nullable|mimes:jpeg,jpg,png,gif,bmp|max:1024',
+            'productID'  => 'integer|required',
+            'adjustment_type'  => 'string|required',
+            'account_id'  => 'integer|required',
+            'description'  => 'string|required',
+            'reason'  => 'string|required',
+            'current_value'  => 'numeric|required',
+            'changed_value'  => 'numeric|required',
+            'adjustment_value'  => 'string|required',
+            'quantity_available'  => 'numeric|required',
+            'quantity_on_hand'  => 'numeric|nullable',
+            'adjusted_quantity_value'  => 'string|nullable',
+            'purchase_price'  => 'numeric|nullable',
+            'cost_price'  => 'numeric|nullable',
+            
         ]);
       
         if($validator->fails()){
@@ -112,22 +106,24 @@ class InventoryController extends Controller
            return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'User not found.', "ResponseMessage" => "User not found.", "ResponseCode" => 401], 401);
         }
         if ($user->account_type != '') {
-
-          $product = Product::create(["name" => $request->input('name'),
+          
+          $inv_adjustmt = InventoryAdjustment::create([
                 "organization_id" => $user->organization_id,
-                'type' => $request->input('type'), 
-                'dimension' => $request->input('dimension'), 
-                'weight' => $request->input('weight'), 
-                'unit_id' => $request->input('unit_id'), 
+                "created_by_id" => $user->id,
+                "product_id" => $request->input('productID'),
+                'adjustment_type' => $request->input('adjustment_type'), 
+                'account_id' => $request->input('account_id'), 
+                'description' => $request->input('description'), 
+                'reason' => $request->input('reason'), 
                 'brand_id' => $request->input('brand_id'), 
-                'manufacturer_id' => $request->input('manufacturer_id'), 
-                'tax_id' => $request->input('tax_id'), 
-                'upc' => $request->input('upc'), 
-                'mpn' => $request->input('mpn'), 
-                'ean' => $request->input('ean'), 
-                'isbn' => $request->input('isbn'), 
-                'currency' => $request->input('currency'), 
-                'sale_price' => $request->input('sale_price'), 
+                'current_value' => $request->input('current_value'), 
+                'changed_value' => $request->input('changed_value'), 
+                'adjustment_value' => $request->input('adjustment_value'), 
+                'quantity_available' => $request->input('quantity_available'), 
+                'quantity_on_hand' => $request->input('quantity_on_hand'), 
+                'adjusted_quantity_value' => $request->input('adjusted_quantity_value'), 
+                'purchase_price' => $request->input('purchase_price'), 
+                'cost_price' => $request->input('cost_price'), 
                 'sale_tax_percent' => $request->input('sale_tax_percent'), 
                 'cost_price' => $request->input('cost_price'), 
                 'cost_tax_percent' => $request->input('cost_tax_percent'), 
@@ -138,23 +134,15 @@ class InventoryController extends Controller
                 'prefered_vendor' => $request->input('prefered_vendor')
               ]);
 
-          if (!is_null($product)) {
-            $product->update(['reference' => generateProductRef($product->id)]);
-            if($request->hasFile('product_image')){
-                $imageArray = $this->imageUtil->saveImgArray($request->file('product_image'), '/products/', $product->id, $request->hasFile('optional_images') ? $request->file('optional_images') : []);
-
-                if (!is_null($imageArray)) {
-                    $primaryImg = array_shift($imageArray);
-                    $product->update(['image_link' => $primaryImg]);
-                 } 
-                 
-            }
-            $this->transLogUtil->logAuditTrail($user->id, $request->ip(), 'Product Creation', '', $product);
+          if (!is_null($inv_adjustmt)) {
+            $inv_adjustmt->update(['reference_no' => generateInventoryAdjRef($inv_adjustmt->id)]);
+           
+            $this->transLogUtil->logAuditTrail($user->id, $request->ip(), 'Inventory Adjustment Creation', '', $inv_adjustmt);
             
           }
-         $product = new ProductResource($product);
+          $inventory_adjustment = $inv_adjustmt;
 
-          return response()->json(compact('product'),201);
+          return response()->json(compact('inventory_adjustment'),201);
         }
         return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'You are not authorized to perform this function.', "ResponseMessage" => 'You are not authorized to perform this function.', "ResponseCode" => 401],401);
         
@@ -164,36 +152,26 @@ class InventoryController extends Controller
     }
 
 
-     //This function a user's account information
-    public function editProduct(Request $request){
+    //This function modifies an inventory adjustment
+    public function editInventoryAdjustment(Request $request){
 
       try{
 
         $validator = Validator::make($request->all() , [
             'productID'  => 'integer|required',
-            'name'  => 'string|required',
-            'type'  => 'string|required',
-            'dimension'  => 'string|required',
-            'weight'  => 'string|required',
-            'unit_id'  => 'integer|required',
-            'brand_id'  => 'integer|required',
-            'manufacturer_id'  => 'integer|required',
-            'tax_id'  => 'integer|required',
-            'inventory_account_id'  => 'integer|nullable',
-            'upc'  => 'string|nullable',
-            'mpn'  => 'string|nullable',
-            'ean'  => 'string|nullable',
-            'isbn'  => 'string|nullable',
-            'currency'  => 'string|nullable',
-            'sale_price'  => 'numeric|required',
-            'sale_tax_percent'  => 'numeric|nullable',
-            'cost_price'  => 'numeric|required',
-            'cost_tax_percent'  => 'numeric|nullable',
-            'opening_stock'  => 'numeric|nullable',
-            'opening_stock_rate_per_unit'  => 'numeric|nullable',
-            'recorder_point'  => 'string|nullable',
-            'prefered_vendor'  => 'string|nullable',
-            'product_image' => 'nullable|mimes:jpeg,jpg,png,gif,bmp|max:1024',
+            'inventoryAdjustmentID'  => 'integer|required',
+            'adjustment_type'  => 'string|required',
+            'account_id'  => 'integer|required',
+            'description'  => 'string|required',
+            'reason'  => 'string|required',
+            'current_value'  => 'numeric|required',
+            'changed_value'  => 'numeric|required',
+            'adjustment_value'  => 'string|required',
+            'quantity_available'  => 'numeric|required',
+            'quantity_on_hand'  => 'numeric|nullable',
+            'adjusted_quantity_value'  => 'string|nullable',
+            'purchase_price'  => 'numeric|nullable',
+            'cost_price'  => 'numeric|nullable',
         ]);
         
         if($validator->fails()){
@@ -206,53 +184,33 @@ class InventoryController extends Controller
            return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'User not found.', "ResponseMessage" => "User not found.", "ResponseCode" => 401], 401);
         }
         if ($user->account_type != '') {
-          $product = Product::find($request->input('productID'));
-          $prod_bk = $product;
-          if (!is_null($product)) {
-              $product->update(["name" => $request->filled('name') ? $request->input('name') : $product->name,
-                'type' => $request->filled('type') ? $request->input('type') : $product->type, 
-                'dimension' => $request->filled('dimension') ? $request->input('dimension') : $product->dimension, 
-                'weight' => $request->filled('weight') ? $request->input('weight') : $product->weight, 
-                'unit_id' => $request->filled('unit_id') ? $request->input('unit_id') : $product->unit_id, 
-                'brand_id' => $request->filled('brand_id') ? $request->input('brand_id') : $product->brand_id, 
-                'manufacturer_id' => $request->filled('manufacturer_id') ? $request->input('manufacturer_id') : $product->manufacturer_id, 
-                'tax_id' => $request->filled('tax_id') ? $request->input('tax_id') : $product->tax_id, 
-                'upc' => $request->filled('upc') ? $request->input('upc') : $product->upc, 
-                'mpn' => $request->filled('mpn') ? $request->input('mpn') : $product->mpn, 
-                'ean' => $request->filled('ean') ? $request->input('ean') : $product->ean, 
-                'isbn' => $request->filled('isbn') ? $request->input('isbn') : $product->isbn, 
-                'currency' => $request->filled('currency') ? $request->input('currency') : $product->currency, 
-                'sale_price' => $request->filled('sale_price') ? $request->input('sale_price') : $product->sale_price, 
-                'sale_tax_percent' => $request->filled('sale_tax_percent') ? $request->input('sale_tax_percent') : $product->sale_tax_percent, 
-                'cost_price' => $request->filled('cost_price') ? $request->input('cost_price') : $product->cost_price, 
-                'cost_tax_percent' => $request->filled('cost_tax_percent') ? $request->input('cost_tax_percent') : $product->cost_tax_percent, 
-                'inventory_account_id' => $request->filled('inventory_account_id') ? $request->input('inventory_account_id') : $product->inventory_account_id, 
-                'opening_stock' => $request->filled('opening_stock') ? $request->input('opening_stock') : $product->opening_stock, 
-                'opening_stock_rate_per_unit' => $request->filled('opening_stock_rate_per_unit') ? $request->input('opening_stock_rate_per_unit') : $product->opening_stock_rate_per_unit, 
-                'recorder_point' => $request->filled('recorder_point') ? $request->input('recorder_point') : $product->recorder_point, 
-                'prefered_vendor' => $request->filled('prefered_vendor') ? $request->input('prefered_vendor') : $product->prefered_vendor
-              ]);
+          $inv_adjustmt = InventoryAdjustment::find($request->input('inventoryAdjustmentID'));
+          $inv_adjustmt_bk = $inv_adjustmt;
+          if (!is_null($inv_adjustmt)) {
+            $inv_adjustmt->update([
+              "product_id" => $request->filled('productID') ? $request->input('productID') : $inv_adjustmt->product_id,
+              'adjustment_type' => $request->filled('adjustment_type') ? $request->input('adjustment_type') : $inv_adjustmt->adjustment_type, 
+              'account_id' => $request->filled('account_id') ? $request->input('account_id') : $inv_adjustmt->account_id, 
+              'description' => $request->filled('description') ? $request->input('description') : $inv_adjustmt->description, 
+              'reason' => $request->filled('reason') ? $request->input('reason') : $inv_adjustmt->reason, 
+              'current_value' => $request->filled('current_value') ? $request->input('current_value') : $inv_adjustmt->current_value, 
+              'changed_value' => $request->filled('changed_value') ? $request->input('changed_value') : $inv_adjustmt->changed_value, 
+              'adjustment_value' => $request->filled('adjustment_value') ? $request->input('adjustment_value') : $inv_adjustmt->adjustment_value, 
+              'quantity_available' => $request->filled('quantity_available') ? $request->input('quantity_available') : $inv_adjustmt->quantity_available, 
+              'quantity_on_hand' => $request->filled('quantity_on_hand') ? $request->input('quantity_on_hand') : $inv_adjustmt->quantity_on_hand, 
+              'adjusted_quantity_value' => $request->filled('adjusted_quantity_value') ? $request->input('adjusted_quantity_value') : $inv_adjustmt->adjusted_quantity_value, 
+              'purchase_price' => $request->filled('purchase_price') ? $request->input('purchase_price') : $inv_adjustmt->purchase_price, 
+              'cost_price' => $request->filled('cost_price') ? $request->input('cost_price') : $inv_adjustmt->cost_price, 
+                
+            ]);
 
-              if($request->hasFile('product_image')){
-                  if (!is_null($product->image_link)) {
-                      $this->imageUtil->deleteImage($product->image_link);
-                  }
-                  $imageArray = $this->imageUtil->saveImgArray($request->file('product_image'), '/products/', $product->id, $request->hasFile('optional_images') ? $request->file('optional_images') : []);
+              $this->transLogUtil->logAuditTrail($user->id, $request->ip(), 'Inventory Adjustment Modification', $inv_adjustmt_bk, $inv_adjustmt);
+            $inventory_adjustment = $inv_adjustmt;
 
-                  if (!is_null($imageArray)) {
-                      $primaryImg = array_shift($imageArray);
-                      $product->update(['image_link' => $primaryImg]);
-                   } 
-                   
-              }
-
-              $this->transLogUtil->logAuditTrail($user->id, $request->ip(), 'Product Modification', $prod_bk, $product);
-
-            }
-            $product = new ProductResource($product);
-
-            return response()->json(compact('product'),201);
+            return response()->json(compact('inventory_adjustment'),201);
+          }
           
+          return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'Inventory adjustment not found', "ResponseMessage" => 'Inventory adjustment not found', "ResponseCode" => 401],401);
         }
         return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'You are not authorized to perform this function.', "ResponseMessage" => 'You are not authorized to perform this function.', "ResponseCode" => 401],401);
         
@@ -261,8 +219,8 @@ class InventoryController extends Controller
       }
     }
     
-    //This returns user mgt page
-    public function getProducts(Request $request){
+    //This returns Inventory Adjustments
+    public function getInventoryAdjustments(Request $request){
       try{
         $user = $this->getAuthUser($request);
         if (!$user) {
@@ -271,15 +229,11 @@ class InventoryController extends Controller
         if ($user->account_type != '') {
           $user_ids[] = 0;
           //$user_ids[] = Auth::user()->id;
-          $products = Product::where('organization_id', $user->organization_id)->orderBy('name', 'asc')->paginate(30);
-          
-          $brands = Brand::where('organization_id', $user->organization_id)->get();
-          $manufacturers = Manufacturer::where('organization_id', $user->organization_id)->get();
-          $units = Unit::where('organization_id', $user->organization_id)->get();
-          $taxes = Tax::where('organization_id', $user->organization_id)->get();
+          $inv_adjustmts = InventoryAdjustment::where('organization_id', $user->organization_id)->orderBy('created_at', 'desc')->paginate(30);
+          $products = Product::where('organization_id', $user->organization_id)->orderBy('name', 'asc');
           $products = ProductResource::collection($products);
-          
-          return response()->json(compact('products', 'brands', 'manufacturers', 'units', 'taxes'),201);
+          $inventory_adjustments = $inv_adjustmts;
+          return response()->json(compact('products', 'inventory_adjustments'),201);
         }
         return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'You are not authorized to perform this function.', "ResponseMessage" => 'You are not authorized to perform this function.', "ResponseCode" => 401],401);
         
@@ -289,10 +243,10 @@ class InventoryController extends Controller
     }
 
    //This returns find user page
-    public function findProduct(Request $request){
+    public function findInventoryAdjustment(Request $request){
        try{
         $validator = Validator::make($request->all() , [
-            'productID'  => 'integer|required',
+            'inventoryAdjustmentID'  => 'integer|required',
         ]);
         if($validator->fails()){
           //$this->transLogUtil->logRequestError($request);
@@ -304,16 +258,14 @@ class InventoryController extends Controller
            return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'User not found.', "ResponseMessage" => "User not found.", "ResponseCode" => 401], 401);
         }
         
-        $product = Product::find($request->input('productID'));
-        if (!is_null($product)) {
-          $brands = Brand::where('organization_id', $user->organization_id)->get();
-          $manufacturers = Manufacturer::where('organization_id', $user->organization_id)->get();
-          $units = Unit::where('organization_id', $user->organization_id)->get();
-          $taxes = Tax::where('organization_id', $user->organization_id)->get();
-          $product = new ProductResource($product);
-          return response()->json(compact('product', 'brands', 'manufacturers', 'units', 'taxes'),201);
+        $inv_adjustmt = InventoryAdjustment::find($request->input('inventoryAdjustmentID'));
+        if (!is_null($inv_adjustmt)) {
+          $products = Product::where('organization_id', $user->organization_id)->orderBy('name', 'asc');
+          $products = ProductResource::collection($products);
+          $inventory_adjustment = $inv_adjustmt;
+          return response()->json(compact('products', 'inventory_adjustment'),201);
         }
-        return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'product not found', "ResponseMessage" => 'product not found', "ResponseCode" => 401],401);
+        return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'Inventory adjustment not found', "ResponseMessage" => 'Inventory adjustment not found', "ResponseCode" => 401],401);
         
       }catch(Exception $e) {
         return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => $e->getMessage(), "ResponseMessage" => 'Something went wrong.'],500);
@@ -323,10 +275,10 @@ class InventoryController extends Controller
    
     
     //This function deletes a user's account
-    public function deleteProduct(Request $request){
+    public function deleteInventoryAdjustment(Request $request){
       try{
         $validator = Validator::make($request->all() , [
-            'productID'  => 'integer|required',
+            'inventoryAdjustmentID'  => 'integer|required',
         ]);
         if($validator->fails()){
           //$this->transLogUtil->logRequestError($request);
@@ -338,12 +290,12 @@ class InventoryController extends Controller
            return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'User not found.', "ResponseMessage" => "User not found.", "ResponseCode" => 401], 401);
         }
         if ($user->account_type != '') {
-          $product = Product::find($request->input('productID'));
-          if (!is_null($product)) {
-            $product->delete();
-            return response()->json(["ResponseStatus" => "Successful", 'Detail' => 'product deleted successfully', "ResponseMessage" => 'product deleted successfully', "ResponseCode" => 201],201);
+          $inv_adjustmt = InventoryAdjustment::find($request->input('inventoryAdjustmentID'));
+          if (!is_null($inv_adjustmt)) {
+            $inv_adjustmt->delete();
+            return response()->json(["ResponseStatus" => "Successful", 'Detail' => 'Inventory adjustment deleted successfully', "ResponseMessage" => 'Inventory adjustment deleted successfully', "ResponseCode" => 201],201);
           }
-          return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'product not found', "ResponseMessage" => 'product not found', "ResponseCode" => 401],401);
+          return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'Inventory adjustment not found', "ResponseMessage" => 'Inventory adjustment not found', "ResponseCode" => 401],401);
         }
         return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'You are not authorized to perform this function.', "ResponseMessage" => 'You are not authorized to perform this function.', "ResponseCode" => 401],401);
         
@@ -353,7 +305,7 @@ class InventoryController extends Controller
     }
 
  //This function blocks and unblock a user
-    public function blockProduct(Request $request){
+    public function approveInventoryAdjustment(Request $request){
       try{
         $validator = Validator::make($request->all() , [
             'userID'  => 'integer|required',

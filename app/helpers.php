@@ -179,17 +179,24 @@ if (! function_exists('generateUniqueCode')) {
 if (! function_exists('generateProductRef')) {
     function generateProductRef($id, $l = 5)
     {
-        return 'INT-PR-'.$id.'-'. substr(md5(uniqid(mt_rand(), true)), 0, $l);
+        return 'INVT-PR-'.$id.'-'. substr(md5(uniqid(mt_rand(), true)), 0, $l);
     }
 }
 
 if (! function_exists('generateProductGroupRef')) {
     function generateProductGroupRef($id, $l = 5)
     {
-        return 'INT-PR-GR-'.$id.'-'. substr(md5(uniqid(mt_rand(), true)), 0, $l);
+        return 'INVT-PR-GR-'.$id.'-'. substr(md5(uniqid(mt_rand(), true)), 0, $l);
     }
 }
 
+
+if (! function_exists('generateInventoryAdjRef')) {
+    function generateInventoryAdjRef($id, $l = 5)
+    {
+        return 'INVT-INV-ADJ-'.$id.'-'. substr(md5(uniqid(mt_rand(), true)), 0, $l);
+    }
+}
 
 
 if (! function_exists('generateSlug')) {

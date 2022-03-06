@@ -96,6 +96,14 @@ Route::group([
         Route::get('productGroup/find', 'ProductController@findProductGroup');
         Route::get('productGroup/remove', 'ProductController@deleteProductGroup');
         Route::get('productGroup/deactivatORactivate', 'ProductController@blockProductGroup');
+
+        
+        Route::post('inventoryAdj/add', 'InventoryController@addInventoryAdjustment');
+        Route::post('inventoryAdj/modify', 'InventoryController@editInventoryAdjustment');
+        Route::get('inventoryAdj/all', 'InventoryController@getInventoryAdjustments');
+        Route::get('inventoryAdj/find', 'InventoryController@findInventoryAdjustment');
+        Route::get('inventoryAdj/remove', 'InventoryController@deleteInventoryAdjustment');
+        //Route::get('product/deactivatORactivate', 'ProductController@blockProduct');
         
         Route::post('logout', 'UserController@logout');
         Route::post('refreshToken', 'UserController@refreshToken');
