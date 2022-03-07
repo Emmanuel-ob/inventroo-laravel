@@ -92,6 +92,7 @@ class ProductController extends Controller
             'mpn'  => 'string|nullable',
             'ean'  => 'string|nullable',
             'isbn'  => 'string|nullable',
+            'sku'  => 'string|nullable',
             'currency'  => 'string|nullable',
             'sale_price'  => 'numeric|required',
             'sale_tax_percent'  => 'numeric|nullable',
@@ -130,6 +131,7 @@ class ProductController extends Controller
                 'mpn' => $request->input('mpn'), 
                 'ean' => $request->input('ean'), 
                 'isbn' => $request->input('isbn'), 
+                'sku' => $request->input('sku'), 
                 'currency' => $request->input('currency'), 
                 'sale_price' => $request->input('sale_price'), 
                 'sale_tax_percent' => $request->input('sale_tax_percent'), 
@@ -188,6 +190,7 @@ class ProductController extends Controller
             'mpn'  => 'string|nullable',
             'ean'  => 'string|nullable',
             'isbn'  => 'string|nullable',
+            'sku'  => 'string|nullable',
             'currency'  => 'string|nullable',
             'sale_price'  => 'numeric|required',
             'sale_tax_percent'  => 'numeric|nullable',
@@ -225,6 +228,7 @@ class ProductController extends Controller
                 'mpn' => $request->filled('mpn') ? $request->input('mpn') : $product->mpn, 
                 'ean' => $request->filled('ean') ? $request->input('ean') : $product->ean, 
                 'isbn' => $request->filled('isbn') ? $request->input('isbn') : $product->isbn, 
+                'sku' => $request->filled('sku') ? $request->input('sku') : $product->sku, 
                 'currency' => $request->filled('currency') ? $request->input('currency') : $product->currency, 
                 'sale_price' => $request->filled('sale_price') ? $request->input('sale_price') : $product->sale_price, 
                 'sale_tax_percent' => $request->filled('sale_tax_percent') ? $request->input('sale_tax_percent') : $product->sale_tax_percent, 
@@ -1038,10 +1042,9 @@ class ProductController extends Controller
             'manufacturer_id'  => 'integer|required',
             'tax_id'  => 'integer|required',
             'products'  => 'required|array',
-            'products.*'  => 'integer',
             'attributes'  => 'required|array',
             'attributes.*'  => 'string',
-            
+            'product_image' => 'nullable|mimes:jpeg,jpg,png,gif,bmp|max:1024',
         ]);
 
       
@@ -1089,12 +1092,45 @@ class ProductController extends Controller
 
             $products = $request->input('products');
             if (!is_null($products)) {
-              foreach ($products as $product_id) {
-                ProductGroupProduct::create([
+              foreach ($products as $product) {
+                $product = json_decode($product);
+                Product::create([
                   'product_group_id' => $productGr->id, 
-                  'product_id' => $product_id, 
+                  "organization_id" => $user->organization_id,
+                  'type' => $request->input('type'), 
+                  //'dimension' => $request->input('dimension'), 
+                  //'weight' => $request->input('weight'), 
+                  'unit_id' => $request->input('unit_id'), 
+                  'brand_id' => $request->input('brand_id'), 
+                  'manufacturer_id' => $request->input('manufacturer_id'), 
+                  'tax_id' => $request->input('tax_id'), 
+                  'upc' => $product->upc, 
+                  //'mpn' => $product->mpn, 
+                  'ean' => $product->ean, 
+                  'isbn' => $product->isbn, 
+                  'sku' => $product->sku, 
+                  //'currency' => $request->input('currency'), 
+                  'sale_price' => $product->sale_price, 
+                  //'sale_tax_percent' => $request->input('sale_tax_percent'), 
+                  'cost_price' => $product->cost_price, 
+                  //'cost_tax_percent' => $request->input('cost_tax_percent'), 
+                  //'inventory_account_id' => $request->input('inventory_account_id'), 
+                  //'opening_stock' => $request->input('opening_stock'), 
+                  //'opening_stock_rate_per_unit' => $request->input('opening_stock_rate_per_unit'), 
+                  'recorder_point' => $product->recorder_point, 
+                  //'prefered_vendor' => $request->input('prefered_vendor') 
                 ]);
               }
+            }
+
+            if($request->hasFile('product_image')){
+                $imageArray = $this->imageUtil->saveImgArray($request->file('product_image'), '/productGroups/', $productGr->id, $request->hasFile('optional_images') ? $request->file('optional_images') : []);
+
+                if (!is_null($imageArray)) {
+                    $primaryImg = array_shift($imageArray);
+                    $productGr->update(['image_link' => $primaryImg]);
+                 } 
+                 
             }
             
             $this->transLogUtil->logAuditTrail($user->id, $request->ip(), 'Product Group Creation', '', $productGr);
@@ -1130,6 +1166,7 @@ class ProductController extends Controller
             'products.*'  => 'integer',
             'attributes'  => 'required|array',
             'attributes.*'  => 'string',
+            'product_image' => 'nullable|mimes:jpeg,jpg,png,gif,bmp|max:1024',
         ]);
         
         if($validator->fails()){
@@ -1208,7 +1245,7 @@ class ProductController extends Controller
           $user_ids[] = 0;
           //$user_ids[] = Auth::user()->id;
           $productGroups = ProductGroup::where('organization_id', $user->organization_id)->orderBy('name', 'asc')->paginate(30);
-          $products = Product::where('organization_id', $user->organization_id)->orderBy('name', 'asc');
+          $products = Product::where('organization_id', $user->organization_id)->orderBy('name', 'asc')->get();
           $brands = Brand::where('organization_id', $user->organization_id)->get();
           $manufacturers = Manufacturer::where('organization_id', $user->organization_id)->get();
           $units = Unit::where('organization_id', $user->organization_id)->get();
@@ -1243,7 +1280,7 @@ class ProductController extends Controller
         
         $productGroup = ProductGroup::find($request->input('productGroupID'));
         if (!is_null($productGroup)) {
-          $products = Product::where('organization_id', $user->organization_id)->orderBy('name', 'asc');
+          $products = Product::where('organization_id', $user->organization_id)->orderBy('name', 'asc')->get();
           $brands = Brand::where('organization_id', $user->organization_id)->get();
           $manufacturers = Manufacturer::where('organization_id', $user->organization_id)->get();
           $units = Unit::where('organization_id', $user->organization_id)->get();

@@ -30,6 +30,7 @@ class ProductResource extends JsonResource
         'mpn' => $this->mpn, 
         'ean' => $this->ean, 
         'isbn' => $this->isbn, 
+        'sku' => $this->sku, 
         'currency' => $this->currency, 
         'sale_price' => $this->sale_price, 
         'sale_tax_percent' => $this->sale_tax_percent, 

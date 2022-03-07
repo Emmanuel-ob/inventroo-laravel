@@ -5,7 +5,7 @@ Use \Carbon\Carbon;
 //use Illuminate\Http\Resources\Json\Resource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class ProductGroupResource extends JsonResource
+class PriceListResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,20 +16,16 @@ class ProductGroupResource extends JsonResource
     public function toArray($request)
     {
 
-        
        return [
-        'productGroupID' => $this->id, 
+        'priceListID' => $this->id, 
         'name' => $this->name, 
-        'reference' => $this->reference, 
         'type' => $this->type, 
-        'returnable' => $this->returnable, 
-        'unit' => $this->unit, 
-        'brand' => $this->brand, 
-        'manufacturer' => $this->manufacturer,
-        'tax' => $this->tax,
-        'image_link' => $this->image_link,
-        'attributes' => $this->attributes,
-        'products' => ProductResource::collection($this->products),
+        'description' => $this->description, 
+        'mark_type' => $this->mark_type, 
+        'percentage' => $this->percentage, 
+        'roundoff' => $this->roundoff,
+        'currency' => $this->currency,
+        'products' => $this->items,
         'created_by' => $this->creator,
         'productGroupStatus' => ($this->status == 1) ? 'Active' : 'Inactive',
         'date_created' => Carbon::parse($this->created_at)->format('M d, Y'),

@@ -15,6 +15,7 @@ class CreatePriceListProductsTable extends Migration
     {
         Schema::create('price_list_products', function (Blueprint $table) {
             $table->id();
+            $table->integer('price_list_id')->nullable();
             $table->integer('product_id')->nullable();
             $table->string('reference')->nullable();
             $table->float('sales_rate');

@@ -24,6 +24,7 @@ class CreateProductGroupsTable extends Migration
             $table->integer('brand_id')->nullable();
             $table->integer('manufacturer_id')->nullable();
             $table->integer('tax_id')->nullable();
+            $table->text('image_link')->nullable();
             $table->integer('organization_id')->nullable();
             $table->integer('created_by_id')->nullable();
             $table->timestamps();

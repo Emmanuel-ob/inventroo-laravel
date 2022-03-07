@@ -5,7 +5,7 @@ Use \Carbon\Carbon;
 //use Illuminate\Http\Resources\Json\Resource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class ProductGroupResource extends JsonResource
+class InventoryAdjustmentResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -15,23 +15,19 @@ class ProductGroupResource extends JsonResource
      */
     public function toArray($request)
     {
-
-        
+      
        return [
-        'productGroupID' => $this->id, 
-        'name' => $this->name, 
-        'reference' => $this->reference, 
-        'type' => $this->type, 
-        'returnable' => $this->returnable, 
-        'unit' => $this->unit, 
+        'iventoryAdjustmentID' => $this->id, 
+        'reference_no' => $this->reference_no, 
+        'adjustment_type' => $this->adjustment_type, 
+        'account_id' => $this->account_id, 
+        'description' => $this->description, 
+        'reason' => $this->reason, 
         'brand' => $this->brand, 
-        'manufacturer' => $this->manufacturer,
-        'tax' => $this->tax,
-        'image_link' => $this->image_link,
-        'attributes' => $this->attributes,
-        'products' => ProductResource::collection($this->products),
+        'status' => ($this->status == 0) ? 'Not processed' : 'Processed',
+        'warehouse_name' => $this->warehouse_name,
+        'adjustmentProducts' => InvAdjustmentProductResource::collection($this->adjustmentProducts),
         'created_by' => $this->creator,
-        'productGroupStatus' => ($this->status == 1) ? 'Active' : 'Inactive',
         'date_created' => Carbon::parse($this->created_at)->format('M d, Y'),
         'date_modified' => Carbon::parse($this->updated_at)->format('M d, Y') 
       ];

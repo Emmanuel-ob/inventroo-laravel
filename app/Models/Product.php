@@ -9,7 +9,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Product extends Model
 {
     use HasFactory, SoftDeletes;
-    protected $fillable = ['name', 'reference', 'status', 'type', 'dimension', 'unit_id', 'brand_id', 'manufacturer_id', 'tax_id', 'organization_id', 'upc', 'mpn', 'ean', 'isbn', 'currency', 'sale_price', 'sale_tax_percent', 'cost_price', 'cost_tax_percent', 'inventory_account_id', 'opening_stock', 'opening_stock_rate_per_unit', 'recorder_point', 'prefered_vendor', 'image_link'];
+    protected $fillable = ['name', 'reference', 'status', 'type', 'dimension', 'unit_id', 'brand_id', 'manufacturer_id', 'tax_id', 'organization_id', 'upc', 'mpn', 'ean', 'isbn', 'currency', 'sale_price', 'sale_tax_percent', 'cost_price', 'cost_tax_percent', 'inventory_account_id', 'opening_stock', 'opening_stock_rate_per_unit', 'recorder_point', 'prefered_vendor', 'image_link', 'product_group_id', 'sku'];
+    
     protected $table = "products";
 
     public function unit()
