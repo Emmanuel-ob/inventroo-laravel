@@ -106,7 +106,7 @@ Route::group([
         //Route::get('product/deactivatORactivate', 'ProductController@blockProduct');
         
         Route::post('priceList/add', 'InventoryController@addPriceList');
-        Route::post('priceList/modify', 'InventoryController@editPriceListt');
+        Route::post('priceList/modify', 'InventoryController@editPriceList');
         Route::get('priceList/all', 'InventoryController@getPriceLists');
         Route::get('priceList/find', 'InventoryController@findPriceList');
         Route::get('priceList/remove', 'InventoryController@deletePriceList');
