@@ -115,7 +115,7 @@ class InventoryController extends Controller
           $inv_adjustmt = InventoryAdjustment::create([
                 "organization_id" => $user->organization_id,
                 "created_by_id" => $user->id,
-                'reference_no' =>  $request->input('reference_no')
+                'reference_no' =>  $request->input('reference_no'),
                 //"product_id" => $request->input('productID'),
                 'adjustment_type' => $request->input('adjustment_type'), 
                 'account_id' => $request->input('account_id'), 

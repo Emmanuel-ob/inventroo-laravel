@@ -1029,9 +1029,9 @@ class ProductController extends Controller
     }
 
 
-    //This Adds a product
+    //This Adds a product Group
     public function addProductGroup(Request $request){
-      //try{
+      try{
 
         $validator = Validator::make($request->all() , [
             'name'  => 'string|required',
@@ -1142,16 +1142,16 @@ class ProductController extends Controller
         }
         return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'You are not authorized to perform this function.', "ResponseMessage" => 'You are not authorized to perform this function.', "ResponseCode" => 401],401);
         
-      // }catch(Exception $e) {
-      //   return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => $e->getMessage(), "ResponseMessage" => 'Something went wrong.'],500);
-      // }
+      }catch(Exception $e) {
+        return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => $e->getMessage(), "ResponseMessage" => 'Something went wrong.'],500);
+      }
     }
 
 
      //This function modifies aproduct group
     public function editProductGroup(Request $request){
 
-      //try{
+      try{
 
         $validator = Validator::make($request->all() , [
             'productGroupID'  => 'integer|required',
@@ -1242,6 +1242,20 @@ class ProductController extends Controller
                 }
               } 
 
+              
+              if($request->hasFile('product_image')){
+                  if (!is_null($productGr->image_link)) {
+                      $this->imageUtil->deleteImage($productGr->image_link);
+                  }
+                  $imageArray = $this->imageUtil->saveImgArray($request->file('product_image'), '/productGroups/', $productGr->id, $request->hasFile('optional_images') ? $request->file('optional_images') : []);
+
+                  if (!is_null($imageArray)) {
+                      $primaryImg = array_shift($imageArray);
+                      $productGr->update(['image_link' => $primaryImg]);
+                   } 
+                   
+              }
+
               $this->transLogUtil->logAuditTrail($user->id, $request->ip(), 'Product Group Modification', $productGr_bk, $productGr);
 
             }
@@ -1252,9 +1266,9 @@ class ProductController extends Controller
         }
         return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'You are not authorized to perform this function.', "ResponseMessage" => 'You are not authorized to perform this function.', "ResponseCode" => 401],401);
         
-      // }catch(Exception $e) {
-      //   return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => $e->getMessage(), "ResponseMessage" => 'Something went wrong.'],500);
-      // }
+      }catch(Exception $e) {
+        return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => $e->getMessage(), "ResponseMessage" => 'Something went wrong.'],500);
+      }
     }
     
     //This returns user mgt page
