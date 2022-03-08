@@ -1098,7 +1098,7 @@ class ProductController extends Controller
                   'product_group_id' => $productGr->id, 
                   "organization_id" => $user->organization_id,
                   'type' => $request->input('type'), 
-                  //'dimension' => $request->input('dimension'), 
+                  'name' => $product->name, 
                   //'weight' => $request->input('weight'), 
                   'unit_id' => $request->input('unit_id'), 
                   'brand_id' => $request->input('brand_id'), 
@@ -1210,11 +1210,34 @@ class ProductController extends Controller
 
               $products = $request->input('products');
               if (!is_null($products)) {
-                ProductGroupProduct::where('product_group_id', $productGr->id)->delete();
-                foreach ($products as $product_id) {
-                  ProductGroupProduct::create([
+                Product::where('product_group_id', $productGr->id)->delete();
+                foreach ($products as $product) {
+                  $product = json_decode($product);
+                  Product::create([
                     'product_group_id' => $productGr->id, 
-                    'product_id' => $product_id, 
+                    "organization_id" => $user->organization_id,
+                    'type' => $request->input('type'), 
+                    'name' => $product->name, 
+                    //'weight' => $request->input('weight'), 
+                    'unit_id' => $request->input('unit_id'), 
+                    'brand_id' => $request->input('brand_id'), 
+                    'manufacturer_id' => $request->input('manufacturer_id'), 
+                    'tax_id' => $request->input('tax_id'), 
+                    'upc' => $product->upc, 
+                    //'mpn' => $product->mpn, 
+                    'ean' => $product->ean, 
+                    'isbn' => $product->isbn, 
+                    'sku' => $product->sku, 
+                    //'currency' => $request->input('currency'), 
+                    'sale_price' => $product->sale_price, 
+                    //'sale_tax_percent' => $request->input('sale_tax_percent'), 
+                    'cost_price' => $product->cost_price, 
+                    //'cost_tax_percent' => $request->input('cost_tax_percent'), 
+                    //'inventory_account_id' => $request->input('inventory_account_id'), 
+                    //'opening_stock' => $request->input('opening_stock'), 
+                    //'opening_stock_rate_per_unit' => $request->input('opening_stock_rate_per_unit'), 
+                    'recorder_point' => $product->recorder_point, 
+                    //'prefered_vendor' => $request->input('prefered_vendor') 
                   ]);
                 }
               } 
