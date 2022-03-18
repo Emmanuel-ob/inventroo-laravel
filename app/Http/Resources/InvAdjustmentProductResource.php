@@ -17,6 +17,7 @@ class InvAdjustmentProductResource extends JsonResource
     {
        
        return [
+        'product_id' => $this->id,
         'current_value' => $this->current_value, 
         'changed_value' => $this->changed_value, 
         'adjustment_value' => $this->adjustment_value, 
