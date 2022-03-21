@@ -193,7 +193,7 @@ class InventoryController extends Controller
         if ($user->account_type != '') {
           $inv_adjustmt = InventoryAdjustment::find($request->input('inventoryAdjustmentID'));
           $inv_adjustmt_bk = $inv_adjustmt;
-          if (!is_null($inv_adjustmt) && $inv_adjustmt->status) {
+          if (!is_null($inv_adjustmt) && $inv_adjustmt->status == 0) {
             $inv_adjustmt->update([
               'adjustment_type' => $request->filled('adjustment_type') ? $request->input('adjustment_type') : $inv_adjustmt->adjustment_type, 
               'account_id' => $request->filled('account_id') ? $request->input('account_id') : $inv_adjustmt->account_id, 
