@@ -171,7 +171,7 @@ class InventoryController extends Controller
       try{
 
         $validator = Validator::make($request->all() , [
-            'productID'  => 'integer|required',
+            //'productID'  => 'integer|required',
             'inventoryAdjustmentID'  => 'integer|required',
             'adjustment_type'  => 'string|required',
             'account_id'  => 'integer|required',
