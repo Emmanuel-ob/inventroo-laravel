@@ -1041,9 +1041,9 @@ class ProductController extends Controller
             'brand_id'  => 'integer|required',
             'manufacturer_id'  => 'integer|required',
             'tax_id'  => 'integer|required',
-            'products'  => 'required|array',
-            'attributes'  => 'required|array',
-            'attributes.*'  => 'string',
+            'products'  => 'required',
+            'attributes'  => 'required',
+            //'attributes.*'  => 'string',
             'product_image' => 'nullable|mimes:jpeg,jpg,png,gif,bmp|max:1024',
         ]);
 
@@ -1077,7 +1077,7 @@ class ProductController extends Controller
 
           if (!is_null($productGr)) {
             $productGr->update(['reference' => generateProductGroupRef($productGr->id)]);
-            $attributes = $request->input('attributes');
+            $attributes = json_decode($request->input('attributes'));
             if (!is_null($attributes)) {
               foreach ($attributes as $attribute) {
                 $attribute = json_decode($attribute);
@@ -1090,7 +1090,7 @@ class ProductController extends Controller
               }
             }
 
-            $products = $request->input('products');
+            $products = json_decode($request->input('products'));
             if (!is_null($products)) {
               foreach ($products as $product) {
                 $product = json_decode($product);
@@ -1162,10 +1162,10 @@ class ProductController extends Controller
             'brand_id'  => 'integer|required',
             'manufacturer_id'  => 'integer|required',
             'tax_id'  => 'integer|required',
-            'products'  => 'required|array',
-            'products.*'  => 'integer',
+            'products'  => 'required',
+            //'products.*'  => 'integer',
             'attributes'  => 'required|array',
-            'attributes.*'  => 'string',
+            //'attributes.*'  => 'string',
             'product_image' => 'nullable|mimes:jpeg,jpg,png,gif,bmp|max:1024',
         ]);
         
