@@ -1077,7 +1077,7 @@ class ProductController extends Controller
 
           if (!is_null($productGr)) {
             $productGr->update(['reference' => generateProductGroupRef($productGr->id)]);
-            $attributes = json_decode($request->input('attributes'));
+            $attributes = $request->input('attributes');
             if (!is_null($attributes)) {
               foreach ($attributes as $attribute) {
                 $attribute = json_decode($attribute);
@@ -1090,7 +1090,7 @@ class ProductController extends Controller
               }
             }
 
-            $products = json_decode($request->input('products'));
+            $products = $request->input('products');
             if (!is_null($products)) {
               foreach ($products as $product) {
                 $product = json_decode($product);
