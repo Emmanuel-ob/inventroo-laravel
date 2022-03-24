@@ -1053,9 +1053,9 @@ class ProductController extends Controller
           return response()->json([ "ResponseStatus" => "Unsuccessful", 'Detail' => $validator->errors(), "ResponseCode" => 401, "ResponseMessage" => implode(', ',$validator->messages()->all())], 401);
           //implode(', ',$validator->messages()->all())
         }
-        $attributes = json_decode($request->input('attributes'));
-        $products = json_decode($request->input('products'));
-        return response()->json(compact('attributes', 'products'),201);
+        // $attributes = json_decode($request->input('attributes'));
+        // $products = json_decode($request->input('products'));
+        // return response()->json(compact('attributes', 'products'),201);
         //$this->transLogUtil->logRequest($request);
         $user = $this->getAuthUser($request);
         if (!$user) {
