@@ -1031,7 +1031,7 @@ class ProductController extends Controller
 
     //This Adds a product Group
     public function addProductGroup(Request $request){
-      //try{
+      try{
 
         $validator = Validator::make($request->all() , [
             'name'  => 'string|required',
@@ -1142,9 +1142,9 @@ class ProductController extends Controller
         }
         return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'You are not authorized to perform this function.', "ResponseMessage" => 'You are not authorized to perform this function.', "ResponseCode" => 401],401);
         
-      // }catch(Exception $e) {
-      //   return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => $e->getMessage(), "ResponseMessage" => 'Something went wrong.'],500);
-      // }
+      }catch(Exception $e) {
+        return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => $e->getMessage(), "ResponseMessage" => 'Something went wrong.'],500);
+      }
     }
 
 
@@ -1164,7 +1164,7 @@ class ProductController extends Controller
             'tax_id'  => 'integer|required',
             'products'  => 'required',
             //'products.*'  => 'integer',
-            'attributes'  => 'required|array',
+            'attributes'  => 'required',
             //'attributes.*'  => 'string',
             'product_image' => 'nullable|mimes:jpeg,jpg,png,gif,bmp|max:1024',
         ]);
@@ -1194,11 +1194,11 @@ class ProductController extends Controller
               ]);
 
               
-              $attributes = $request->input('attributes');
+              $attributes = json_decode($request->input('attributes'));
               if (!is_null($attributes)) {
                 ProductGroupAttribute::where('product_group_id', $productGr->id)->delete();
                 foreach ($attributes as $attribute) {
-                  $attribute = json_decode($attribute);
+                  //$attribute = json_decode($attribute);
                   ProductGroupAttribute::create([
                     'product_group_id' => $productGr->id, 
                     'attribute_name' => $attribute->name, 
@@ -1208,11 +1208,11 @@ class ProductController extends Controller
                 }
               }
 
-              $products = $request->input('products');
+              $products = json_decode($request->input('products'));
               if (!is_null($products)) {
                 Product::where('product_group_id', $productGr->id)->delete();
                 foreach ($products as $product) {
-                  $product = json_decode($product);
+                  //$product = json_decode($product);
                   Product::create([
                     'product_group_id' => $productGr->id, 
                     "organization_id" => $user->organization_id,
