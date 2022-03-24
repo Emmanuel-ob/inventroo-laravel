@@ -1078,17 +1078,17 @@ class ProductController extends Controller
           if (!is_null($productGr)) {
             $productGr->update(['reference' => generateProductGroupRef($productGr->id)]);
             $attributes = $request->input('attributes');
-            if (!is_null($attributes)) {
-              foreach ($attributes as $attribute) {
-                $attribute = json_decode($attribute);
-                ProductGroupAttribute::create([
-                  'product_group_id' => $productGr->id, 
-                  'attribute_name' => $attribute->name, 
-                  'attribute_value' => $attribute->option, 
-                  'organization_id' => $user->organization_id
-                ]);
-              }
-            }
+            // if (!is_null($attributes)) {
+            //   foreach ($attributes as $attribute) {
+            //     $attribute = json_decode($attribute);
+            //     ProductGroupAttribute::create([
+            //       'product_group_id' => $productGr->id, 
+            //       'attribute_name' => $attribute->name, 
+            //       'attribute_value' => $attribute->option, 
+            //       'organization_id' => $user->organization_id
+            //     ]);
+            //   }
+            // }
 
             $products = $request->input('products');
             if (!is_null($products)) {
