@@ -41,7 +41,8 @@ class ProductResource extends JsonResource
         'opening_stock_rate_per_unit' => $this->opening_stock_rate_per_unit, 
         'recorder_point' => $this->recorder_point, 
         'image_link' => $this->image_link, 
-        'prefered_vendor' => $this->prefered_vendor, 
+        'prefered_vendor' => $this->prefered_vendor,
+        'categoy' => $this->category, 
         'productStatus' => ($this->status == 1) ? 'Active' : 'Inactive',
         'date_created' => Carbon::parse($this->created_at)->format('M d, Y'),
         'date_modified' => Carbon::parse($this->updated_at)->format('M d, Y') 

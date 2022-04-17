@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Product extends Model
 {
     use HasFactory, SoftDeletes;
-    protected $fillable = ['name', 'reference', 'status', 'type', 'dimension', 'unit_id', 'brand_id', 'manufacturer_id', 'tax_id', 'organization_id', 'upc', 'mpn', 'ean', 'isbn', 'currency', 'sale_price', 'sale_tax_percent', 'cost_price', 'cost_tax_percent', 'inventory_account_id', 'opening_stock', 'opening_stock_rate_per_unit', 'recorder_point', 'prefered_vendor', 'image_link', 'product_group_id', 'sku'];
+    protected $fillable = ['name', 'reference', 'status', 'type', 'dimension', 'unit_id', 'brand_id', 'manufacturer_id', 'tax_id', 'organization_id', 'upc', 'mpn', 'ean', 'isbn', 'currency', 'sale_price', 'sale_tax_percent', 'cost_price', 'cost_tax_percent', 'inventory_account_id', 'opening_stock', 'opening_stock_rate_per_unit', 'recorder_point', 'prefered_vendor', 'image_link', 'product_group_id', 'sku', 'category_id'];
     
     protected $table = "products";
 
@@ -31,5 +31,10 @@ class Product extends Model
     public function tax()
     {
         return $this->hasOne(Tax::class, 'id', 'tax_id')->select(['id', 'name', 'percentage']);
+    }
+
+    public function category()
+    {
+        return $this->hasOne(ProductCategory::class, 'id', 'category_id')->select(['id', 'category_name', 'description']);
     }
 }

@@ -83,6 +83,14 @@ Route::group([
         Route::get('tax/remove', 'ProductController@deleteTax');
 
 
+        //Product Categories Routes
+        Route::post('category/add', 'ProductController@addCategory');
+        Route::post('category/modify', 'ProductController@editCategory');
+        Route::get('category/all', 'ProductController@getCategories');
+        Route::get('category/find', 'ProductController@findCategory');
+        Route::get('category/remove', 'ProductController@deleteCategory');
+
+
         Route::post('product/add', 'ProductController@addProduct');
         Route::post('product/modify', 'ProductController@editProduct');
         Route::get('product/all', 'ProductController@getProducts');

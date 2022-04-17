@@ -26,6 +26,7 @@ use App\Models\Tax;
 use App\Models\Unit;
 use App\Models\Manufacturer;
 use App\Models\Brand;
+use App\Models\ProductCategory;
 use App\Http\Resources\UserResource;
 use App\Http\Resources\ProductResource;
 use App\Http\Resources\ProductGroupResource;
@@ -87,6 +88,7 @@ class ProductController extends Controller
             'brand_id'  => 'integer|required',
             'manufacturer_id'  => 'integer|required',
             'tax_id'  => 'integer|required',
+            'category_id'  => 'integer|nullable',
             'inventory_account_id'  => 'integer|nullable',
             'upc'  => 'string|nullable',
             'mpn'  => 'string|nullable',
@@ -127,6 +129,7 @@ class ProductController extends Controller
                 'brand_id' => $request->input('brand_id'), 
                 'manufacturer_id' => $request->input('manufacturer_id'), 
                 'tax_id' => $request->input('tax_id'), 
+                'category_id' => $request->input('category_id'), 
                 'upc' => $request->input('upc'), 
                 'mpn' => $request->input('mpn'), 
                 'ean' => $request->input('ean'), 
@@ -185,6 +188,7 @@ class ProductController extends Controller
             'brand_id'  => 'integer|required',
             'manufacturer_id'  => 'integer|required',
             'tax_id'  => 'integer|required',
+            'category_id'  => 'integer|nullable',
             'inventory_account_id'  => 'integer|nullable',
             'upc'  => 'string|nullable',
             'mpn'  => 'string|nullable',
@@ -224,6 +228,7 @@ class ProductController extends Controller
                 'brand_id' => $request->filled('brand_id') ? $request->input('brand_id') : $product->brand_id, 
                 'manufacturer_id' => $request->filled('manufacturer_id') ? $request->input('manufacturer_id') : $product->manufacturer_id, 
                 'tax_id' => $request->filled('tax_id') ? $request->input('tax_id') : $product->tax_id, 
+                'category_id' => $request->filled('category_id') ? $request->input('category_id') : $product->category_id, 
                 'upc' => $request->filled('upc') ? $request->input('upc') : $product->upc, 
                 'mpn' => $request->filled('mpn') ? $request->input('mpn') : $product->mpn, 
                 'ean' => $request->filled('ean') ? $request->input('ean') : $product->ean, 
@@ -1028,6 +1033,163 @@ class ProductController extends Controller
       }
     }
 
+    //This Adds Product Category
+    public function addCategory(Request $request){
+      try{
+
+        $validator = Validator::make($request->all() , [
+            'category_name'  => 'string|required',
+            'description'  => 'string|nullable',
+        ]);
+        if($validator->fails()){
+          //$this->transLogUtil->logRequestError($request);
+          return response()->json([ "ResponseStatus" => "Unsuccessful", 'Detail' => $validator->errors(), "ResponseCode" => 401, "ResponseMessage" => implode(', ',$validator->messages()->all())], 401);
+          //implode(', ',$validator->messages()->all())
+        }
+        
+        $user = $this->getAuthUser($request);
+        if (!$user) {
+           return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'User not found.', "ResponseMessage" => "User not found.", "ResponseCode" => 401], 401);
+        }
+        if ($user->account_type != '') {
+          
+          $category = ProductCategory::create([
+                        "category_name" => $request->input('category_name'),
+                        "description" => $request->input('description'),
+                        "organization_id" => $user->organization_id
+                      ]);
+          
+          return response()->json(compact('unit'),201);
+        }
+        return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'You are not authorized to perform this function.', "ResponseMessage" => 'You are not authorized to perform this function.', "ResponseCode" => 401],401);
+        
+      }catch(Exception $e) {
+        return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => $e->getMessage(), "ResponseMessage" => 'Something went wrong.'],500);
+      }
+    }
+
+
+    //This function modifies a ProductCategory's information
+    public function editCategory(Request $request){
+
+      try{
+
+        $validator = Validator::make($request->all() , [
+            'categoryID'  => 'integer|required',
+            'category_name'  => 'string|required',
+            'description'  => 'required|nullable',
+        ]);
+        if($validator->fails()){
+          //$this->transLogUtil->logRequestError($request);
+          return response()->json([ "ResponseStatus" => "Unsuccessful", 'Detail' => $validator->errors(), "ResponseCode" => 401, "ResponseMessage" => implode(', ',$validator->messages()->all())], 401);
+          //implode(', ',$validator->messages()->all())
+        }
+        $user = $this->getAuthUser($request);
+        if (!$user) {
+           return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'User not found.', "ResponseMessage" => "User not found.", "ResponseCode" => 401], 401);
+        }
+        if ($user->account_type != '') {
+          $category = ProductCategory::find($request->input('categoryID'));
+          if (!is_null($category)) {
+            $category->update([
+                    "category_name" => $request->filled('category_name') ? $request->input('category_name') : $category->category_name,
+                    "description" => $request->filled('description') ? $request->input('description') : $category->description,
+                 ]);
+            
+            return response()->json(compact('category'),201);
+          }
+          return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'category not found', "ResponseMessage" => 'category not found', "ResponseCode" => 401],401);
+        }
+        return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'You are not authorized to perform this function.', "ResponseMessage" => 'You are not authorized to perform this function.', "ResponseCode" => 401],401);
+        
+      }catch(Exception $e) {
+        return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => $e->getMessage(), "ResponseMessage" => 'Something went wrong.'],500);
+      }
+    }
+    
+    //This returns all categories
+    public function getCategories(Request $request){
+      try{
+        $user = $this->getAuthUser($request);
+        if (!$user) {
+           return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'User not found.', "ResponseMessage" => "User not found.", "ResponseCode" => 401], 401);
+        }
+        
+        $categories = ProductCategory::where("organization_id", $user->organization_id)->get();
+        if (!is_null($categories)) {
+         
+          return response()->json(compact('categories'),201);
+        }
+        return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'categories not found', "ResponseMessage" => 'categories not found', "ResponseCode" => 401],401);
+        
+      }catch(Exception $e) {
+        return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => $e->getMessage(), "ResponseMessage" => 'Something went wrong.'],500);
+      }
+        
+    }
+
+   //This returns a category
+    public function findCategory(Request $request){
+      try{
+        $validator = Validator::make($request->all() , [
+            'categoryID'  => 'integer|required',
+        ]);
+        if($validator->fails()){
+          //$this->transLogUtil->logRequestError($request);
+          return response()->json([ "ResponseStatus" => "Unsuccessful", 'Detail' => $validator->errors(), "ResponseCode" => 401, "ResponseMessage" => implode(', ',$validator->messages()->all())], 401);
+          //implode(', ',$validator->messages()->all())
+        }
+        $user = $this->getAuthUser($request);
+        if (!$user) {
+           return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'User not found.', "ResponseMessage" => "User not found.", "ResponseCode" => 401], 401);
+        }
+        
+        $category = ProductCategory::find($request->input('categoryID'));
+        if (!is_null($category)) {
+          
+          return response()->json(compact('category'),201);
+        }
+        return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'category not found', "ResponseMessage" => 'category not found', "ResponseCode" => 401],401);
+        
+      }catch(Exception $e) {
+        return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => $e->getMessage(), "ResponseMessage" => 'Something went wrong.'],500);
+      }
+    }
+
+    
+    
+    //This function deletes a Category
+    public function deleteCategory(Request $request){
+        try{
+
+        $validator = Validator::make($request->all() , [
+            'categoryID'  => 'integer|required',
+        ]);
+        if($validator->fails()){
+          //$this->transLogUtil->logRequestError($request);
+          return response()->json([ "ResponseStatus" => "Unsuccessful", 'Detail' => $validator->errors(), "ResponseCode" => 401, "ResponseMessage" => implode(', ',$validator->messages()->all())], 401);
+          //implode(', ',$validator->messages()->all())
+        }
+        $user = $this->getAuthUser($request);
+        if (!$user) {
+           return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'User not found.', "ResponseMessage" => "User not found.", "ResponseCode" => 401], 401);
+        }
+        if ($user->account_type != '') {
+          $category = ProductCategory::find($request->input('categoryID'));
+          if (!is_null($category)) {
+            $category->delete();
+            return response()->json(["ResponseStatus" => "Successful", 'Detail' => 'category deleted successfully', "ResponseMessage" => 'category deleted successfully', "ResponseCode" => 201],201);
+          }
+          return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'category not found', "ResponseMessage" => 'category not found', "ResponseCode" => 401],401);
+        }
+        return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'You are not authorized to perform this function.', "ResponseMessage" => 'You are not authorized to perform this function.', "ResponseCode" => 401],401);
+        
+      }catch(Exception $e) {
+        return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => $e->getMessage(), "ResponseMessage" => 'Something went wrong.'],500);
+      }
+    }
+
+
 
     //This Adds a product Group
     public function addProductGroup(Request $request){
@@ -1039,6 +1201,7 @@ class ProductController extends Controller
             'returnable'  => 'integer|nullable',
             'unit_id'  => 'integer|required',
             'brand_id'  => 'integer|required',
+            'category_id'  => 'integer|nullable',
             'manufacturer_id'  => 'integer|required',
             'tax_id'  => 'integer|required',
             'products'  => 'required',
@@ -1104,6 +1267,7 @@ class ProductController extends Controller
                   'brand_id' => $request->input('brand_id'), 
                   'manufacturer_id' => $request->input('manufacturer_id'), 
                   'tax_id' => $request->input('tax_id'), 
+                  'category_id' => $request->input('category_id'), 
                   'upc' => $product->upc, 
                   //'mpn' => $product->mpn, 
                   'ean' => $product->ean, 
@@ -1162,6 +1326,7 @@ class ProductController extends Controller
             'brand_id'  => 'integer|required',
             'manufacturer_id'  => 'integer|required',
             'tax_id'  => 'integer|required',
+            'category_id'  => 'integer|nullable',
             'products'  => 'required',
             //'products.*'  => 'integer',
             'attributes'  => 'required',
@@ -1221,6 +1386,7 @@ class ProductController extends Controller
                     //'weight' => $request->input('weight'), 
                     'unit_id' => $request->input('unit_id'), 
                     'brand_id' => $request->input('brand_id'), 
+                    'category_id' => $request->input('category_id'), 
                     'manufacturer_id' => $request->input('manufacturer_id'), 
                     'tax_id' => $request->input('tax_id'), 
                     'upc' => $product->upc, 
