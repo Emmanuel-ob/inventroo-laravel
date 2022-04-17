@@ -1059,7 +1059,7 @@ class ProductController extends Controller
                         "organization_id" => $user->organization_id
                       ]);
           
-          return response()->json(compact('unit'),201);
+          return response()->json(compact('category'),201);
         }
         return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'You are not authorized to perform this function.', "ResponseMessage" => 'You are not authorized to perform this function.', "ResponseCode" => 401],401);
         
