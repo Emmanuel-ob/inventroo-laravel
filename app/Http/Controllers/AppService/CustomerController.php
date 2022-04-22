@@ -101,6 +101,11 @@ class CustomerController extends Controller
            return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'User not found.', "ResponseMessage" => "User not found.", "ResponseCode" => 401], 401);
         }
         if ($user->account_type != '') {
+          if (!is_null($request->input('date_of_birth'))) {
+            $dob = Carbon::createFromFormat('d-m-Y', $request->input('date_of_birth'))->format('Y-m-d');
+          }else{
+            $dob = $request->input('date_of_birth');
+          }
 
           $customer = Customer::create([
                 "first_name" => $request->input('name'),
@@ -114,7 +119,7 @@ class CustomerController extends Controller
                 'mobile_phone' => $request->input('mobile_phone'), 
                 'work_phone' => $request->input('work_phone'), 
                 'address' => $request->input('address'), 
-                'date_of_birth' => $request->input('date_of_birth'), 
+                'date_of_birth' => $dob, 
                 'website_url' => $request->input('website_url'), 
                 'organization_id' => $user->organization_id,
               ]);
@@ -168,6 +173,9 @@ class CustomerController extends Controller
           $customer = Customer::find($request->input('customerID'));
           $customer_bk = $customer;
           if (!is_null($customer)) {
+            if (!is_null($request->input('date_of_birth'))) {
+              $dob = Carbon::createFromFormat('d-m-Y', $request->input('date_of_birth'))->format('Y-m-d');
+            }
               $customer->update(["first_name" => $request->filled('first_name') ? $request->input('first_name') : $customer->first_name,
                 'last_name' => $request->filled('last_name') ? $request->input('last_name') : $customer->last_name, 
                 'display_name' => $request->filled('display_name') ? $request->input('display_name') : $customer->display_name, 
@@ -179,7 +187,7 @@ class CustomerController extends Controller
                 'mobile_phone' => $request->filled('mobile_phone') ? $request->input('mobile_phone') : $customer->mobile_phone, 
                 'work_phone' => $request->filled('work_phone') ? $request->input('work_phone') : $customer->work_phone, 
                 'address' => $request->filled('address') ? $request->input('address') : $customer->address, 
-                'date_of_birth' => $request->filled('date_of_birth') ? $request->input('date_of_birth') : $customer->date_of_birth, 
+                'date_of_birth' => $request->filled('date_of_birth') ? $dob : $customer->date_of_birth, 
                 'website_url' => $request->filled('website_url') ? $request->input('website_url') : $customer->website_url, 
                 
               ]);
