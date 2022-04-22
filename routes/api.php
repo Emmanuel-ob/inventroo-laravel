@@ -119,6 +119,13 @@ Route::group([
         Route::get('priceList/find', 'InventoryController@findPriceList');
         Route::get('priceList/remove', 'InventoryController@deletePriceList');
 
+        //Route for customers
+        Route::post('customer/add', 'CustomerController@addCustomer');
+        Route::post('customer/modify', 'CustomerController@editCustomer');
+        Route::get('customer/all', 'CustomerController@getCustomers');
+        Route::get('customer/find', 'CustomerController@findCustomer');
+        Route::get('customer/remove', 'CustomerController@deleteCustomer');
+
         Route::post('logout', 'UserController@logout');
         Route::post('refreshToken', 'UserController@refreshToken');
         Route::post('resetPassword', 'UserController@resetPassword');
