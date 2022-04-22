@@ -108,7 +108,7 @@ class CustomerController extends Controller
           }
 
           $customer = Customer::create([
-                "first_name" => $request->input('name'),
+                "first_name" => $request->input('first_name'),
                 "last_name" => $request->input('display_name'),
                 'display_name' => $request->input('display_name'), 
                 'salutation' => $request->input('salutation'), 
