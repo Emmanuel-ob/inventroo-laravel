@@ -102,7 +102,7 @@ class CustomerController extends Controller
         }
         if ($user->account_type != '') {
           if (!is_null($request->input('date_of_birth'))) {
-            $dob = Carbon::createFromFormat('d-m-Y', $request->input('date_of_birth'));
+            $dob = Carbon::createFromFormat('Y-m-d', $request->input('date_of_birth'));
           }else{
             $dob = $request->input('date_of_birth');
           }
@@ -174,7 +174,7 @@ class CustomerController extends Controller
           $customer_bk = $customer;
           if (!is_null($customer)) {
             if (!is_null($request->input('date_of_birth'))) {
-              $dob = Carbon::createFromFormat('d-m-Y', $request->input('date_of_birth'));
+              $dob = Carbon::createFromFormat('Y-m-d', $request->input('date_of_birth'));
             }
               $customer->update(["first_name" => $request->filled('first_name') ? $request->input('first_name') : $customer->first_name,
                 'last_name' => $request->filled('last_name') ? $request->input('last_name') : $customer->last_name, 
