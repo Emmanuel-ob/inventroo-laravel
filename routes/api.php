@@ -126,6 +126,14 @@ Route::group([
         Route::get('customer/find', 'CustomerController@findCustomer');
         Route::get('customer/remove', 'CustomerController@deleteCustomer');
 
+        
+        //Route for salesOrder
+        Route::post('salesOrder/add', 'SalesOrderController@addSalesOrder');
+        Route::post('salesOrder/modify', 'SalesOrderController@editSalesOrder');
+        Route::get('salesOrder/all', 'SalesOrderController@getSalesOrders');
+        Route::get('salesOrder/find', 'SalesOrderController@findSalesOrder');
+        Route::get('salesOrder/remove', 'SalesOrderController@deleteSalesOrder');
+
         Route::post('logout', 'UserController@logout');
         Route::post('refreshToken', 'UserController@refreshToken');
         Route::post('resetPassword', 'UserController@resetPassword');

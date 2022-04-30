@@ -20,6 +20,8 @@ use Tymon\JWTAuth\PayloadFactory;
 use Tymon\JWTAuth\JWTManager as JWT;
 use App\Models\Product;
 use App\Models\Customer;
+use App\Models\CustomerBillingAddress;
+use App\Models\CustomerShippingAddress;
 use App\Http\Resources\ProductGroupResource;
 use App\Http\Resources\CustomerResource;
 use GuzzleHttp\Client;
@@ -124,6 +126,35 @@ class CustomerController extends Controller
                 'organization_id' => $user->organization_id,
               ]);
 
+          if (!is_null($customer) && $request->input('account_type') == 'business') {
+            CustomerBillingAddress::create([
+                   'customer_id' => $customer->id, 
+                   'billing_attention' => $request->input('billing_attention'), 
+                   'billing_city' => $request->input('billing_city'), 
+                   'billing_state' => $request->input('billing_state'), 
+                   'billing_country' => $request->input('billing_country'), 
+                   'billing_zip_code' => $request->input('billing_zip_code'), 
+                   'billing_address' => $request->input('billing_address'), 
+                   'billing_phone' => $request->input('billing_phone'), 
+                   'billing_fax' $request->input('billing_fax'), 
+                   'organization_id' => $user->organization_id
+                 ]);
+
+            CustomerShippingAddress::create([
+                   'customer_id' => $customer->id, 
+                   'shipping_attention' => $request->input('shipping_attention'), 
+                   'shipping_city' => $request->input('shipping_city'), 
+                   'shipping_state' => $request->input('shipping_state'), 
+                   'shipping_country' => $request->input('shipping_country'), 
+                   'shipping_zip_code' => $request->input('shipping_zip_code'), 
+                   'shipping_address' => $request->input('shipping_address'), 
+                   'shipping_phone' => $request->input('shipping_phone'), 
+                   'shipping_fax' $request->input('shipping_fax'), 
+                   'organization_id' => $user->organization_id
+                 ]);
+
+          }
+
           
          $customer = new CustomerResource($customer);
 
@@ -151,7 +182,7 @@ class CustomerController extends Controller
             'account_type'  => 'string|required',
             'company_name'  => 'string|nullable',
             'customer_email'  => 'string|email',
-            'gender'  => 'string|required',
+            'gender'  => 'string|nullable',
             'mobile_phone'  => 'numeric|required',
             'work_phone'  => 'numeric|nullable',
             'address'  => 'string|required',
@@ -192,6 +223,37 @@ class CustomerController extends Controller
                 
               ]);
 
+              $billingAddr = $customer->billingAddress;
+              $shippingAddr = $customer->shippingAddress;
+
+              if (!is_null($billingAddr)) {
+                $billingAddr->update([
+                       'billing_attention' => $request->filled('billing_attention') ? $request->input('billing_attention') : $billingAddr->billing_attention, 
+                       'billing_city' => $request->filled('billing_city') ? $request->input('billing_city') : $billingAddr->billing_city, 
+                       'billing_state' => $request->filled('billing_state') ? $request->input('billing_state') : $billingAddr->billing_state, 
+                       'billing_country' => $request->filled('billing_country') ? $request->input('billing_country') : $billingAddr->billing_country, 
+                       'billing_zip_code' => $request->filled('billing_zip_code') ? $request->input('billing_zip_code') : $billingAddr->billing_zip_code, 
+                       'billing_address' => $request->filled('billing_address') ? $request->input('billing_address') : $billingAddr->billing_address, 
+                       'billing_phone' => $request->filled('billing_phone') ? $request->input('billing_phone') : $billingAddr->billing_phone, 
+                       'billing_fax' => $request->filled('billing_fax') ? $request->input('billing_fax') : $billingAddr->billing_fax
+                     ]);
+                
+              }
+
+              if (!is_null($shippingAddr)) {
+                
+                $shippingAddr->update([
+                       'shipping_attention' => $request->filled('shipping_attention') ? $request->input('shipping_attention') : $billingAddr->shipping_attention, 
+                       'shipping_city' => $request->filled('shipping_city') ? $request->input('shipping_city') : $billingAddr->shipping_city, 
+                       'shipping_state' => $request->filled('shipping_state') ? $request->input('shipping_state') : $billingAddr->shipping_state, 
+                       'shipping_country' => $request->filled('shipping_country') ? $request->input('shipping_country') : $billingAddr->shipping_country, 
+                       'shipping_zip_code' => $request->filled('shipping_zip_code') ? $request->input('shipping_zip_code') : $billingAddr->shipping_zip_code, 
+                       'shipping_address' => $request->filled('shipping_address') ? $request->input('shipping_address') : $billingAddr->shipping_address, 
+                       'shipping_phone' => $request->filled('shipping_phone') ? $request->input('shipping_phone') : $billingAddr->shipping_phone, 
+                       'shipping_fax' => $request->filled('shipping_fax') ? $request->input('shipping_fax') : $billingAddr->shipping_fax
+                     ]);
+                
+              }
               
               $this->transLogUtil->logAuditTrail($user->id, $request->ip(), 'Customer Modification', $customer_bk, $customer);
 

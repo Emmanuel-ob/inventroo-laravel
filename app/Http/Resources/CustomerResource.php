@@ -30,6 +30,8 @@ class CustomerResource extends JsonResource
         'mobile_phone' => $this->mobile_phone,
         'work_phone' => $this->work_phone,
         'address' => $this->address,
+        'billingAddress' => $this->billingAddress,
+        'shippingAddress' => $this->shippingAddress,
         'date_of_birth' => Carbon::parse($this->date_of_birth)->format('Y-m-d'),
         'website_url' => $this->website_url,
         'date_created' => Carbon::parse($this->created_at)->format('M d, Y'),
