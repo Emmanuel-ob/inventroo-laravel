@@ -126,14 +126,17 @@ class SalesOrderController extends Controller
          
 
           if (!is_null($salesOrder) && $request->filled('items')) {
-            
-            if (gettype($request->input('items')) == 'array') {
-              $items = json_encode($request->input('items'));
+            $itemType = gettype($request->input('items'));
+            if ($itemType == 'array') {
+              $items = $request->input('items');
             }else{
               $items = json_decode($request->input('items'));
             }
             $total = 0;
             foreach ($items as $item) {
+              if ($itemType) == 'array') {
+                $item = json_decode($item);
+              }
               SalesOrderItem::create([
                  'sales_order_id' => $salesOrder->id, 
                  'product_id' => $item->product_id, 
@@ -216,13 +219,17 @@ class SalesOrderController extends Controller
 
               if ($request->filled('items')) {
                 SalesOrderItem::where('sales_order_id', $salesOrder->id)->delete();
-                if (gettype($request->input('items')) == 'array') {
-                  $items = json_encode($request->input('items'));
+                $itemType = gettype($request->input('items'));
+                if ($itemType == 'array') {
+                  $items = $request->input('items');
                 }else{
                   $items = json_decode($request->input('items'));
                 }
                 $total = 0;
                 foreach ($items as $item) {
+                  if ($itemType) == 'array') {
+                    $item = json_decode($item);
+                  }
                   SalesOrderItem::create([
                      'sales_order_id' => $salesOrder->id, 
                      'product_id' => $item->product_id, 
