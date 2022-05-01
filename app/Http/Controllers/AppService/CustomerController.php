@@ -71,7 +71,7 @@ class CustomerController extends Controller
     
     //This Adds a Customer
     public function addCustomer(Request $request){
-      try{
+      //try{
 
         $validator = Validator::make($request->all() , [
             'first_name'  => 'string|required',
@@ -162,9 +162,9 @@ class CustomerController extends Controller
         }
         return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'You are not authorized to perform this function.', "ResponseMessage" => 'You are not authorized to perform this function.', "ResponseCode" => 401],401);
         
-      }catch(Exception $e) {
-        return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => $e->getMessage(), "ResponseMessage" => 'Something went wrong.'],500);
-      }
+      // }catch(Exception $e) {
+      //   return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => $e->getMessage(), "ResponseMessage" => 'Something went wrong.'],500);
+      // }
     }
 
 
