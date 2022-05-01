@@ -81,7 +81,7 @@ class CustomerController extends Controller
             'account_type'  => 'string|required',
             'company_name'  => 'string|nullable',
             'customer_email'  => 'string|email|max:255|unique:customers',
-            'gender'  => 'string|required',
+            'gender'  => 'string|nullable',
             'mobile_phone'  => 'numeric|required',
             'work_phone'  => 'numeric|nullable',
             'address'  => 'string|required',
