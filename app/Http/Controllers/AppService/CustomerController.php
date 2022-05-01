@@ -71,7 +71,7 @@ class CustomerController extends Controller
     
     //This Adds a Customer
     public function addCustomer(Request $request){
-      //try{
+      try{
 
         $validator = Validator::make($request->all() , [
             'first_name'  => 'string|required',
@@ -88,6 +88,22 @@ class CustomerController extends Controller
             'date_of_birth'  => 'date|nullable',
             'website_url'  => 'string|nullable',
             'use_delivey_address'  => 'integer|nullable',
+            'billing_attention' => 'string|nullable', 
+            'billing_city' => 'string|nullable', 
+            'billing_state' => 'string|nullable', 
+            'billing_country' => 'string|nullable', 
+            'billing_zip_code' => 'string|nullable', 
+            'billing_address' => 'string|nullable', 
+            'billing_phone' => 'string|nullable', 
+            'billing_fax' => 'string|nullable', 
+            'shipping_attention' => 'string|nullable', 
+            'shipping_city' => 'string|nullable', 
+            'shipping_state' => 'string|nullable', 
+            'shipping_country' => 'string|nullable', 
+            'shipping_zip_code' => 'string|nullable', 
+            'shipping_address' => 'string|nullable', 
+            'shipping_phone' => 'string|nullable', 
+            'shipping_fax' => 'string|nullable', 
             
         ]);
       
@@ -162,9 +178,9 @@ class CustomerController extends Controller
         }
         return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'You are not authorized to perform this function.', "ResponseMessage" => 'You are not authorized to perform this function.', "ResponseCode" => 401],401);
         
-      // }catch(Exception $e) {
-      //   return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => $e->getMessage(), "ResponseMessage" => 'Something went wrong.'],500);
-      // }
+      }catch(Exception $e) {
+        return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => $e->getMessage(), "ResponseMessage" => 'Something went wrong.'],500);
+      }
     }
 
 
@@ -189,6 +205,22 @@ class CustomerController extends Controller
             'date_of_birth'  => 'date|nullable',
             'website_url'  => 'string|nullable',
             'use_delivey_address'  => 'integer|nullable',
+            'billing_attention' => 'string|nullable', 
+            'billing_city' => 'string|nullable', 
+            'billing_state' => 'string|nullable', 
+            'billing_country' => 'string|nullable', 
+            'billing_zip_code' => 'string|nullable', 
+            'billing_address' => 'string|nullable', 
+            'billing_phone' => 'string|nullable', 
+            'billing_fax' => 'string|nullable', 
+            'shipping_attention' => 'string|nullable', 
+            'shipping_city' => 'string|nullable', 
+            'shipping_state' => 'string|nullable', 
+            'shipping_country' => 'string|nullable', 
+            'shipping_zip_code' => 'string|nullable', 
+            'shipping_address' => 'string|nullable', 
+            'shipping_phone' => 'string|nullable', 
+            'shipping_fax' => 'string|nullable',
         ]);
         
         if($validator->fails()){
