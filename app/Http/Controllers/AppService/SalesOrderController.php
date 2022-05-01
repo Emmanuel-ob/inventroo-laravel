@@ -227,7 +227,7 @@ class SalesOrderController extends Controller
                 }
                 $total = 0;
                 foreach ($items as $item) {
-                  if ($itemType) == 'array') {
+                  if ($itemType == 'array') {
                     $item = json_decode($item);
                   }
                   SalesOrderItem::create([
