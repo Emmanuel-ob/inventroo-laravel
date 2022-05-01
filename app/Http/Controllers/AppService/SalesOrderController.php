@@ -126,7 +126,12 @@ class SalesOrderController extends Controller
          
 
           if (!is_null($salesOrder) && $request->filled('items')) {
-            $items = json_decode($request->input('items'));
+            
+            if (gettype($request->input('items')) == 'array') {
+              $items = $request->input('items');
+            }else{
+              $items = json_decode($request->input('items'));
+            }
             $total = 0;
             foreach ($items as $item) {
               SalesOrderItem::create([
@@ -211,7 +216,11 @@ class SalesOrderController extends Controller
 
               if ($request->filled('items')) {
                 SalesOrderItem::where('sales_order_id', $salesOrder->id)->delete();
-                $items = json_decode($request->input('items'));
+                if (gettype($request->input('items')) == 'array') {
+                  $items = $request->input('items');
+                }else{
+                  $items = json_decode($request->input('items'));
+                }
                 $total = 0;
                 foreach ($items as $item) {
                   SalesOrderItem::create([

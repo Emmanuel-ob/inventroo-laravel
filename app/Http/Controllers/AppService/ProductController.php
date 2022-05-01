@@ -1240,7 +1240,12 @@ class ProductController extends Controller
 
           if (!is_null($productGr)) {
             $productGr->update(['reference' => generateProductGroupRef($productGr->id)]);
-            $attributes = json_decode($request->input('attributes'));
+            
+            if (gettype($request->input('attributes')) == 'array') {
+              $attributes = $request->input('attributes');
+            }else{
+              $attributes = json_decode($request->input('attributes'));
+            }
             if (!is_null($attributes)) {
               foreach ($attributes as $attribute) {
                 //$attribute = json_decode($attribute);
@@ -1253,7 +1258,12 @@ class ProductController extends Controller
               }
             }
 
-            $products = json_decode($request->input('products'));
+            
+            if (gettype($request->input('products')) == 'array') {
+              $products = $request->input('products');
+            }else{
+              $products = json_decode($request->input('products'));
+            }
             if (!is_null($products)) {
               foreach ($products as $product) {
                 //$product = json_decode($product);
@@ -1359,7 +1369,11 @@ class ProductController extends Controller
               ]);
 
               
-              $attributes = json_decode($request->input('attributes'));
+              if (gettype($request->input('attributes')) == 'array') {
+                $attributes = $request->input('attributes');
+              }else{
+                $attributes = json_decode($request->input('attributes'));
+              }
               if (!is_null($attributes)) {
                 ProductGroupAttribute::where('product_group_id', $productGr->id)->delete();
                 foreach ($attributes as $attribute) {
@@ -1373,7 +1387,11 @@ class ProductController extends Controller
                 }
               }
 
-              $products = json_decode($request->input('products'));
+              if (gettype($request->input('products')) == 'array') {
+                $products = $request->input('products');
+              }else{
+                $products = json_decode($request->input('products'));
+              }
               if (!is_null($products)) {
                 Product::where('product_group_id', $productGr->id)->delete();
                 foreach ($products as $product) {
