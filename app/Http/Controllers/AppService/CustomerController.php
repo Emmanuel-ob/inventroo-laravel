@@ -149,7 +149,7 @@ class CustomerController extends Controller
                    'shipping_zip_code' => $request->input('shipping_zip_code'), 
                    'shipping_address' => $request->input('shipping_address'), 
                    'shipping_phone' => $request->input('shipping_phone'), 
-                   'shipping_fax' $request->input('shipping_fax'), 
+                   'shipping_fax' => $request->input('shipping_fax'), 
                    'organization_id' => $user->organization_id
                  ]);
 
