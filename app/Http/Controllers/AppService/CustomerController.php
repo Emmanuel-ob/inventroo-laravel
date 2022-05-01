@@ -136,7 +136,7 @@ class CustomerController extends Controller
                    'billing_zip_code' => $request->input('billing_zip_code'), 
                    'billing_address' => $request->input('billing_address'), 
                    'billing_phone' => $request->input('billing_phone'), 
-                   'billing_fax' $request->input('billing_fax'), 
+                   'billing_fax' => $request->input('billing_fax'), 
                    'organization_id' => $user->organization_id
                  ]);
 
