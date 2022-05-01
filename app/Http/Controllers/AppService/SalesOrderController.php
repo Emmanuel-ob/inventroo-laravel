@@ -128,7 +128,7 @@ class SalesOrderController extends Controller
           if (!is_null($salesOrder) && $request->filled('items')) {
             
             if (gettype($request->input('items')) == 'array') {
-              $items = $request->input('items');
+              $items = json_encode($request->input('items'));
             }else{
               $items = json_decode($request->input('items'));
             }
@@ -217,7 +217,7 @@ class SalesOrderController extends Controller
               if ($request->filled('items')) {
                 SalesOrderItem::where('sales_order_id', $salesOrder->id)->delete();
                 if (gettype($request->input('items')) == 'array') {
-                  $items = $request->input('items');
+                  $items = json_encode($request->input('items'));
                 }else{
                   $items = json_decode($request->input('items'));
                 }
