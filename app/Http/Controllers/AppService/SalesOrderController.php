@@ -205,7 +205,7 @@ class SalesOrderController extends Controller
               $expected_shipment_date = Carbon::createFromFormat('Y-m-d', $request->input('expected_shipment_date'));
             }
               $salesOrder->update(["customer_id" => $request->filled('customer_id') ? $request->input('customer_id') : $customer->customer_id,
-                'customer_name' => $request->filled('customer_name') ? $request->input('last_name') : $customer->customer_name, 
+                'customer_name' => $request->filled('customer_name') ? $request->input('customer_name') : $customer->customer_name, 
                 'sales_order' => $request->filled('sales_order') ? $request->input('sales_order') : $customer->sales_order, 
                 'reference' => $request->filled('reference') ? $request->input('reference') : $customer->reference, 
                 'sales_date' => $request->filled('sales_date') ? $sales_date : $customer->sales_date, 
