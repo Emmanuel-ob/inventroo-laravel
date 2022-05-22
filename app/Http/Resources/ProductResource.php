@@ -42,7 +42,7 @@ class ProductResource extends JsonResource
         'recorder_point' => $this->recorder_point, 
         'image_link' => $this->image_link, 
         'prefered_vendor' => $this->prefered_vendor,
-        'categoy' => $this->category, 
+        'category' => $this->category, 
         'productStatus' => ($this->status == 1) ? 'Active' : 'Inactive',
         'date_created' => Carbon::parse($this->created_at)->format('M d, Y'),
         'date_modified' => Carbon::parse($this->updated_at)->format('M d, Y') 

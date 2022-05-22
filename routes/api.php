@@ -40,6 +40,7 @@ Route::group([
     
    ], function() {
         Route::post('account/updateOrgAccount', 'UserController@updateOrgAccount');
+        Route::get('account/refreshToken', 'UserController@refreshToken');
 
         //Users Routes
         Route::post('user/add', 'RoleController@addUser');
@@ -97,6 +98,9 @@ Route::group([
         Route::get('product/find', 'ProductController@findProduct');
         Route::get('product/remove', 'ProductController@deleteProduct');
         Route::get('product/deactivatORactivate', 'ProductController@blockProduct');
+        Route::get('product/productsByCategory', 'ProductController@getProductsByCategory');
+        Route::get('product/searchProduct', 'ProductController@searchProduct');
+        Route::get('product/scanProduct', 'ProductController@scanProduct');
 
         Route::post('productGroup/add', 'ProductController@addProductGroup');
         Route::post('productGroup/modify', 'ProductController@editProductGroup');

@@ -402,6 +402,107 @@ class ProductController extends Controller
     }
 
 
+    //This gets products in a category
+    public function getProductsByCategory(Request $request){
+      try{
+
+        $validator = Validator::make($request->all() , [
+            'category_id'  => 'integer|required',
+        ]);
+        if($validator->fails()){
+          //$this->transLogUtil->logRequestError($request);
+          return response()->json([ "ResponseStatus" => "Unsuccessful", 'Detail' => $validator->errors(), "ResponseCode" => 401, "ResponseMessage" => implode(', ',$validator->messages()->all())], 401);
+          //implode(', ',$validator->messages()->all())
+        }
+        $user = $this->getAuthUser($request);
+        if (!$user) {
+           return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'User not found.', "ResponseMessage" => "User not found.", "ResponseCode" => 401], 401);
+        }
+        if ($user->account_type != '') {
+          
+          $products = Product::where([['organization_id', $user->organization_id], ['category_id', $request->input('category_id')]])->orderBy('name', 'asc')->paginate(30);
+          
+          $products = ProductResource::collection($products);
+          
+          return response()->json(compact('products'),201);
+        }
+        return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'You are not authorized to perform this function.', "ResponseMessage" => 'You are not authorized to perform this function.', "ResponseCode" => 401],401);
+        
+      }catch(Exception $e) {
+        return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => $e->getMessage(), "ResponseMessage" => 'Something went wrong.'],500);
+      }
+    }
+
+
+    //This gets product  search result
+    public function searchProduct(Request $request){
+      try{
+
+        $validator = Validator::make($request->all() , [
+            'search_value'  => 'string|required',
+        ]);
+        if($validator->fails()){
+          //$this->transLogUtil->logRequestError($request);
+          return response()->json([ "ResponseStatus" => "Unsuccessful", 'Detail' => $validator->errors(), "ResponseCode" => 401, "ResponseMessage" => implode(', ',$validator->messages()->all())], 401);
+          //implode(', ',$validator->messages()->all())
+        }
+        $user = $this->getAuthUser($request);
+        if (!$user) {
+           return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'User not found.', "ResponseMessage" => "User not found.", "ResponseCode" => 401], 401);
+        }
+
+        if ($user->account_type != '') {
+          $search_value = $request->input('search_value');
+          $products = Product::where('name',  'LIKE', '%' . $search_value . '%')
+                      ->orWhere('sku', $search_value)
+                      ->orWhere('reference', $search_value)
+                      ->where('organization_id', $user->organization_id)
+                      ->orderBy('name', 'asc')->paginate(30);
+          
+          $products = ProductResource::collection($products);
+          
+          return response()->json(compact('products'),201);
+        }
+        return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'You are not authorized to perform this function.', "ResponseMessage" => 'You are not authorized to perform this function.', "ResponseCode" => 401],401);
+        
+      }catch(Exception $e) {
+        return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => $e->getMessage(), "ResponseMessage" => 'Something went wrong.'],500);
+      }
+    }
+
+   
+    //This gets product  search result
+    public function scanProduct(Request $request){
+      try{
+
+        $validator = Validator::make($request->all() , [
+            'search_value'  => 'string|required',
+        ]);
+        if($validator->fails()){
+          //$this->transLogUtil->logRequestError($request);
+          return response()->json([ "ResponseStatus" => "Unsuccessful", 'Detail' => $validator->errors(), "ResponseCode" => 401, "ResponseMessage" => implode(', ',$validator->messages()->all())], 401);
+        }
+        $user = $this->getAuthUser($request);
+        if (!$user) {
+           return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'User not found.', "ResponseMessage" => "User not found.", "ResponseCode" => 401], 401);
+        }
+
+        if ($user->account_type != '') {
+          $search_value = $request->input('search_value');
+          $products = Product::where('sku', $search_value)->first();
+          $product = new ProductResource($product);           
+          
+          return response()->json(compact('product'),201);
+        }
+        return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'You are not authorized to perform this function.', "ResponseMessage" => 'You are not authorized to perform this function.', "ResponseCode" => 401],401);
+        
+      }catch(Exception $e) {
+        return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => $e->getMessage(), "ResponseMessage" => 'Something went wrong.'],500);
+      }
+    }
+
+
+
     //This Adds a Manufacturer
     public function addManufacturer(Request $request){
       try{
@@ -1267,7 +1368,7 @@ class ProductController extends Controller
             if (!is_null($products)) {
               foreach ($products as $product) {
                 //$product = json_decode($product);
-                Product::create([
+                $product = Product::create([
                   'product_group_id' => $productGr->id, 
                   "organization_id" => $user->organization_id,
                   'type' => $request->input('type'), 
@@ -1294,6 +1395,10 @@ class ProductController extends Controller
                   'recorder_point' => $product->recorder_point, 
                   //'prefered_vendor' => $request->input('prefered_vendor') 
                 ]);
+
+                if (!is_null($product)) {
+                  $product->update(['reference' => generateProductRef($product->id)]);
+                }
               }
             }
 
@@ -1396,7 +1501,7 @@ class ProductController extends Controller
                 Product::where('product_group_id', $productGr->id)->delete();
                 foreach ($products as $product) {
                   //$product = json_decode($product);
-                  Product::create([
+                  $product = Product::create([
                     'product_group_id' => $productGr->id, 
                     "organization_id" => $user->organization_id,
                     'type' => $request->input('type'), 
@@ -1423,6 +1528,8 @@ class ProductController extends Controller
                     'recorder_point' => $product->recorder_point, 
                     //'prefered_vendor' => $request->input('prefered_vendor') 
                   ]);
+                  
+                  
                 }
               } 
 
