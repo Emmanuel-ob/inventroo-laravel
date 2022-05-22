@@ -490,7 +490,10 @@ class ProductController extends Controller
         if ($user->account_type != '') {
           $search_value = $request->input('search_value');
           $product = Product::where('sku', $search_value)->first();
-          $product = new ProductResource($product);           
+          if (!is_null($product)) {
+            $product = new ProductResource($product); 
+          }
+           $product = [];         
           
           return response()->json(compact('product'),201);
         }
