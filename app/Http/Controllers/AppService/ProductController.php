@@ -492,8 +492,9 @@ class ProductController extends Controller
           $product = Product::where('sku', $search_value)->first();
           if (!is_null($product)) {
             $product = new ProductResource($product); 
+          }else{
+           return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'No Product matching input was found.', "ResponseMessage" => "No Product matching input was found.", "ResponseCode" => 401], 401);     
           }
-           $product = [];         
           
           return response()->json(compact('product'),201);
         }
