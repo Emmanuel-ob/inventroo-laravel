@@ -30,6 +30,7 @@ use App\Models\ProductCategory;
 use App\Http\Resources\UserResource;
 use App\Http\Resources\ProductResource;
 use App\Http\Resources\ProductGroupResource;
+use App\Http\Resources\CategoryResource;
 use GuzzleHttp\Client;
 
 use App\Repositories\InventrooMailUtils;
@@ -1222,7 +1223,7 @@ class ProductController extends Controller
         
         $categories = ProductCategory::where("organization_id", $user->organization_id)->get();
         if (!is_null($categories)) {
-         
+          $categories = CategoryResource::collection($categories);
           return response()->json(compact('categories'),201);
         }
         return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'categories not found', "ResponseMessage" => 'categories not found', "ResponseCode" => 401],401);
