@@ -22,8 +22,11 @@ use App\Models\Product;
 use App\Models\Customer;
 use App\Models\SalesOrder;
 use App\Models\SalesOrderItem;
+use App\Models\Payment;
+use App\Models\PaymentItem;
 use GuzzleHttp\Client;
 use App\Http\Resources\SalesOrderResource;
+use App\Http\Resources\PaymentResource;
 use App\Repositories\InventrooMailUtils;
 use App\Repositories\TransactionLogUtils;
 use App\Repositories\ImageUtils;
@@ -336,6 +339,112 @@ class SalesOrderController extends Controller
             return response()->json(["ResponseStatus" => "Successful", 'Detail' => 'salesOrder deleted successfully', "ResponseMessage" => 'salesOrder deleted successfully', "ResponseCode" => 201],201);
           }
           return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'salesOrder not found', "ResponseMessage" => 'salesOrder not found', "ResponseCode" => 401],401);
+        }
+        return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'You are not authorized to perform this function.', "ResponseMessage" => 'You are not authorized to perform this function.', "ResponseCode" => 401],401);
+        
+      }catch(Exception $e) {
+        return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => $e->getMessage(), "ResponseMessage" => 'Something went wrong.'],500);
+      }
+    }
+
+
+    //This Adds a Payment
+    public function addPayment(Request $request){
+      try{
+
+        $validator = Validator::make($request->all() , [
+            'credit'  => 'numeric|nullable',
+            'discount'  => 'numeric|nullable',
+            'tips'  => 'numeric|nullable',
+            'tax'  => 'numeric|nullable',
+            'sub_total'  => 'numeric|nullable',
+            'total'  => 'numeric|nullable',
+            'currency'  => 'string|required',
+            'items'  => 'required',
+        
+        ]);
+      
+        if($validator->fails()){
+          //$this->transLogUtil->logRequestError($request);
+          return response()->json([ "ResponseStatus" => "Unsuccessful", 'Detail' => $validator->errors(), "ResponseCode" => 401, "ResponseMessage" => implode(', ',$validator->messages()->all())], 401);
+          //implode(', ',$validator->messages()->all())
+        }
+      
+        //$this->transLogUtil->logRequest($request);
+        $user = $this->getAuthUser($request);
+        if (!$user) {
+           return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'User not found.', "ResponseMessage" => "User not found.", "ResponseCode" => 401], 401);
+        }
+        if ($user->account_type != '') {
+         
+          $payment = Payment::create([
+                "credit" => $request->input('credit'),
+                "discount" => $request->input('discount'),
+                'tips' => $request->input('tips'), 
+                'sub_total' => $request->input('sub_total'), 
+                'total' => $request->input('total'), 
+                'currency' => $request->input('currency'), 
+                'created_by_id' => $user->id, 
+                'organization_id' => $user->organization_id,
+              ]);
+         
+
+          if (!is_null($payment) && $request->filled('items')) {
+            $itemType = gettype($request->input('items'));
+            if ($itemType == 'array') {
+              $items = $request->input('items');
+            }else{
+              $items = json_decode($request->input('items'));
+            }
+             ['payment_id', 'product_id', 'product_name', 'quantity', 'rate', 'total_cost', 'currency']
+            
+            foreach ($items as $item) {
+              if ($itemType == 'array') {
+                $item = json_decode($item);
+              }
+             
+              PaymentItem::create([
+                 'payment_id' => $payment->id, 
+                 'product_id' => $item->product_id, 
+                 'product_name' => $item->product_name, 
+                 'quantity' => $item->quantity, 
+                 'rate' => $item->rate, 
+                 'total_cost' => $item->total_cost, 
+                 'currency' => $item->currency, 
+              ]);
+              
+
+            }
+            
+          }
+
+          
+         $payment = new PaymentResource($payment);
+
+          return response()->json(compact('payment'),201);
+        }
+        return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'You are not authorized to perform this function.', "ResponseMessage" => 'You are not authorized to perform this function.', "ResponseCode" => 401],401);
+        
+      }catch(Exception $e) {
+        return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => $e->getMessage(), "ResponseMessage" => 'Something went wrong.'],500);
+      }
+    }
+
+
+     //This returns an org's Payments
+    public function getPayments(Request $request){
+      try{
+        $user = $this->getAuthUser($request);
+        if (!$user) {
+           return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'User not found.', "ResponseMessage" => "User not found.", "ResponseCode" => 401], 401);
+        }
+        if ($user->account_type != '') {
+          
+          $payments = Payment::where('organization_id', $user->organization_id)->orderBy('id', 'desc')->paginate(30);
+          
+          $payments = PaymentResource::collection($payments);
+          
+          return response()->json(compact('payments'),201);
         }
         return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'You are not authorized to perform this function.', "ResponseMessage" => 'You are not authorized to perform this function.', "ResponseCode" => 401],401);
         
