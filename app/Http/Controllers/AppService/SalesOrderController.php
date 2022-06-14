@@ -360,6 +360,7 @@ class SalesOrderController extends Controller
             'sub_total'  => 'numeric|nullable',
             'total'  => 'numeric|nullable',
             'currency'  => 'string|required',
+            'payment_mode'  => 'string|required',
             'items'  => 'required',
         
         ]);
@@ -384,6 +385,7 @@ class SalesOrderController extends Controller
                 'sub_total' => $request->input('sub_total'), 
                 'total' => $request->input('total'), 
                 'currency' => $request->input('currency'), 
+                'payment_mode' => $request->input('payment_mode'), 
                 'created_by_id' => $user->id, 
                 'organization_id' => $user->organization_id,
               ]);

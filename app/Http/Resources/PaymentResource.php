@@ -25,6 +25,7 @@ class PaymentResource extends JsonResource
         'sub_total' => $this->sub_total,
         'total' => $this->total,
         'currency' => $this->currency,
+        'payment_mode' => $this->payment_mode,
         'items' => $this->items,
         'date_created' => Carbon::parse($this->created_at)->format('M d, Y'),
         'date_modified' => Carbon::parse($this->updated_at)->format('M d, Y') 
