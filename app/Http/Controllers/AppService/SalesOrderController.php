@@ -396,7 +396,6 @@ class SalesOrderController extends Controller
             }else{
               $items = json_decode($request->input('items'));
             }
-             ['payment_id', 'product_id', 'product_name', 'quantity', 'rate', 'total_cost', 'currency']
             
             foreach ($items as $item) {
               if ($itemType == 'array') {
