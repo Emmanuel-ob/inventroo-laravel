@@ -382,6 +382,7 @@ class SalesOrderController extends Controller
                 "credit" => $request->input('credit'),
                 "discount" => $request->input('discount'),
                 'tips' => $request->input('tips'), 
+                'tax' => $request->input('tax'), 
                 'sub_total' => $request->input('sub_total'), 
                 'total' => $request->input('total'), 
                 'currency' => $request->input('currency'), 
