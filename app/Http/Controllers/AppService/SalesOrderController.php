@@ -431,6 +431,38 @@ class SalesOrderController extends Controller
     }
 
 
+    //This returns a Payment
+    public function findPayment(Request $request){
+       try{
+        $validator = Validator::make($request->all() , [
+            'paymentID'  => 'integer|required',
+        ]);
+        if($validator->fails()){
+          //$this->transLogUtil->logRequestError($request);
+          return response()->json([ "ResponseStatus" => "Unsuccessful", 'Detail' => $validator->errors(), "ResponseCode" => 401, "ResponseMessage" => implode(', ',$validator->messages()->all())], 401);
+          //implode(', ',$validator->messages()->all())
+        }
+        $user = $this->getAuthUser($request);
+        if (!$user) {
+           return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'User not found.', "ResponseMessage" => "User not found.", "ResponseCode" => 401], 401);
+        }
+        
+        $payment = Payment::find($request->input('paymentID'));
+        if (!is_null($payment)) {
+          
+          $payment = new PaymentResource($payment);
+          return response()->json(compact('payment'),201);
+        }
+        return response()->json(["ResponseStatus" => "Unsuccessful", 'Detail' => 'payment not found', "ResponseMessage" => 'payment not found', "ResponseCode" => 401],401);
+        
+      }catch(Exception $e) {
+        return response()->json(["ResponseStatus" => "Unsuccessful", "ResponseCode" => 500, 'Detail' => $e->getMessage(), "ResponseMessage" => 'Something went wrong.'],500);
+      }
+    }
+
+   
+
+
      //This returns an org's Payments
     public function getPayments(Request $request){
       try{
