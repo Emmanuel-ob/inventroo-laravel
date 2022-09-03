@@ -8,7 +8,7 @@ return  [
     ],
     // hours before activation expires
     'activation_ttl' => 2,
-    'frontend_base_url' => 'https://inventroo.com/',
+    'frontend_base_url' => 'https://dashboard.inventroo.com/',
     'mail_from' => 'transactions@inventroo.com',
     
      //Transaction status
